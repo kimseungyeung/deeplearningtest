@@ -1,7 +1,9 @@
 package com.example.myapplication;
 
+import android.app.ProgressDialog;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +22,7 @@ import org.deeplearning4j.text.sentenceiterator.FileSentenceIterator;
 import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
+import org.deeplearning4j.text.tokenization.tokenizerfactory.NGramTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.nd4j.linalg.io.ClassPathResource;
 
@@ -37,13 +40,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     EditText edt_word;
     TextView tv_result;
     Word2Vec vec = null;
-    Collection<String> lst=null;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        Collection<String> lst=null;
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
 
-        component();
+            component();
 
     }
 
@@ -54,29 +57,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_text = (Button) findViewById(R.id.btn_text);
         btn_text.setOnClickListener(this);
         btn_learning.setOnClickListener(this);
-        if (vec == null) {
-            File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "pathToSaveModel.txt");
-            try {
-                if (f != null && f.exists()) {
-                    vec = WordVectorSerializer.loadFullModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "pathToSaveModel.txt");
-                }
-            } catch (FileNotFoundException e) {
-
-            }
-        }
+        new LoadingTask().execute();
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_learning:
-                learning();
+                new LearningTask().execute();
                 break;
             case R.id.btn_text:
                 if (vec != null) {
                     String word = edt_word.getText().toString().trim();
                     try {
                         lst = vec.wordsNearestSum(word, 10);
+
                         tv_result.setText("결과: " + lst.toString());
                     } catch (NullPointerException e) {
                         Toast.makeText(this, "결과값이 없습니다.", Toast.LENGTH_LONG).show();
@@ -93,10 +88,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Uri url = Uri.parse("android.resource://" + getPackageName() + "/" + "raw/" + "resulttext");
         String path = "";
 //                File localFile = new File(Environment.getExternalStorageDirectory(), "raw_sentences.txt");
-        File localFile = new File(Environment.getExternalStorageDirectory(), "resulttext.txt");
+        File localFile = new File(Environment.getExternalStorageDirectory(), "test.txt");
         iter = new FileSentenceIterator(localFile);
-
         TokenizerFactory t = new DefaultTokenizerFactory();
+
         t.setTokenPreProcessor(new CommonPreprocessor());
 //        log.info("Building model....");
         try {
@@ -104,8 +99,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .minWordFrequency(5)
                     .iterations(1)
                     .layerSize(100)
-                    .seed(42)
-                    .windowSize(2)
+//                    .seed(42)
+                    .windowSize(5)
                     .iterate(iter)
                     .tokenizerFactory(t)
                     .build();
@@ -135,5 +130,73 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    public class LearningTask extends AsyncTask<Integer, Integer, Boolean> {
+        ProgressDialog asyncDialog = null;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
 
+            if (!isFinishing() && this != null) {
+                asyncDialog = new ProgressDialog(MainActivity.this);
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                asyncDialog.setMessage("학습 중 입니다...");
+                asyncDialog.setCancelable(false);
+                asyncDialog.show();
+
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(Integer... integers) {
+            learning();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            if (asyncDialog.isShowing()) {
+                asyncDialog.dismiss();
+            }
+        }
+    }
+    public class LoadingTask extends AsyncTask<Integer, Integer, Boolean> {
+        ProgressDialog asyncDialog = null;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            if (!isFinishing() && this != null) {
+                asyncDialog = new ProgressDialog(MainActivity.this);
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                asyncDialog.setMessage("로딩 중 입니다...");
+                asyncDialog.setCancelable(false);
+                asyncDialog.show();
+
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(Integer... integers) {
+            if (vec == null) {
+                File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "pathToSaveModel.txt");
+                try {
+                    if (f != null && f.exists()) {
+                        vec = WordVectorSerializer.loadFullModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "pathToSaveModel.txt");
+                    }
+                } catch (FileNotFoundException e) {
+
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            if (asyncDialog.isShowing()) {
+                asyncDialog.dismiss();
+            }
+        }
+    }
 }

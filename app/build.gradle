@@ -28,40 +28,6 @@ android {
             exclude 'META-INF/notice.txt'
 
 
-
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-locale-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/linux-x86_64/libgomp.so.1'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-stdio-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-time-l1-1-0.dll'
-//            exclude  'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-environment-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-multibyte-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-runtime-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/msvcp140.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-stdio-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-strinsg-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-time-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-environment-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/vcruntime140.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-string-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-string-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-filesystem-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-utility-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-locale-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/concrt140.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-utility-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-math-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-convert-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/linux-x86/libgomp.so.1'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-math-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/vcruntime140.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-multibyte-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-filesystem-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/msvcp140.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/concrt140.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-heap-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-heap-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86/api-ms-win-crt-convert-l1-1-0.dll'
-//            exclude 'org/bytedeco/javacpp/windows-x86_64/api-ms-win-crt-runtime-l1-1-0.dll'
         }
     }
 
@@ -106,7 +72,8 @@ dependencies {
     implementation group: 'org.bytedeco.javacpp-presets', name: 'leptonica', version: '1.76.0-1.4.3', classifier: "android-arm64"
     implementation group: 'org.bytedeco.javacpp-presets', name: 'leptonica', version: '1.76.0-1.4.3', classifier: "android-x86"
     implementation group: 'org.bytedeco.javacpp-presets', name: 'leptonica', version: '1.76.0-1.4.3', classifier: "android-x86_64"
-
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:design:28.0.0'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     testImplementation 'junit:junit:4.12'
