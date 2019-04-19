@@ -56,6 +56,7 @@
                 android:id="@+id/edt_minword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="number"
                 android:singleLine="true"
                 />
         </LinearLayout>
@@ -72,6 +73,7 @@
                 android:id="@+id/edt_iter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="number"
                 android:singleLine="true"
                 />
         </LinearLayout>

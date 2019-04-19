@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         minword =Integer.parseInt(sf.getString("minword", "5").trim());
         itter=Integer.parseInt( sf.getString("iter", "1").trim());
         filename=sf.getString("filename", "test").trim();
-        String path =Environment.getExternalStorageDirectory()+"/deeplearning"; //폴더 경로
+        String path =Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/"; //폴더 경로
         File Folder = new File(path);
 
         // 해당 디렉토리가 없을경우 디렉토리를 생성합니다.
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_text:
 
                 if (vec != null) {
-                    String word = edt_word.getText().toString().trim();
+                    String word = edt_word.getText().toString();
                     try {
                         lst = vec.wordsNearestSum(word, 10);
                     Collection<String> ll = vec.wordsNearest(word,10);
@@ -124,7 +124,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Uri url = Uri.parse("android.resource://" + getPackageName() + "/" + "raw/" + "resulttext");
         String path = "";
 //                File localFile = new File(Environment.getExternalStorageDirectory(), "raw_sentences.txt");
-        File localFile = new File(Environment.getExternalStorageDirectory()+"/deeplearning", filename+".txt");
+
+        File localFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/", filename+".txt");
         iter = new FileSentenceIterator(localFile);
         TokenizerFactory t = new DefaultTokenizerFactory();
 
@@ -132,8 +133,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        log.info("Building model....");
         try {
             vec = new Word2Vec.Builder()
-                    .minWordFrequency(minword)
-                    .iterations(itter)
+                    .minWordFrequency(minword) //등장 횟수가 minword 이하인 단어는 무시
+                    .iterations(itter)   //학습반복횟수
                     .layerSize(layersize)
                     .windowSize(windowsize)
                     .iterate(iter)
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                    .windowSize(5)
 //                    .iterate(iter)
 //                    .tokenizerFactory(t)
-//                    .batchSize(1000)
+//                    .batchSize(1000) // 사전을 구축할때 한번에 읽을 단어 수
 //                    .build();
 
             vec.fit();
@@ -159,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     f.delete();
                 }
             }
-            WordVectorSerializer.writeFullModel(vec, Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "pathToSaveModel.txt");
+            WordVectorSerializer.writeFullModel(vec, Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
         }catch (IllegalStateException e){
             Toast.makeText(this,"학습오류 해당파일을 확인해주세요",Toast.LENGTH_LONG).show();
         }
