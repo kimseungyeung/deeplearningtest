@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -19,17 +21,19 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.Holder> {
     private ArrayList<MenuData> mlist;
     private ItemClick itemClick;
     private MenuAdapter mm;
+    public Context context;
     public interface ItemClick {
         public void onClick(View view,int position);
     }
     public void onClick(View view,int position){
         int d =0;
     }
-    public  MenuAdapter(ArrayList<MenuData>mdaalist,int ilayout,int islayout){
+    public  MenuAdapter(ArrayList<MenuData>mdaalist, int ilayout, int islayout, Context ctx){
         this.mlist=mdaalist;
         this.itemlayout=ilayout;
         this.itemsublayout =islayout;
         mm=this;
+        this.context =ctx;
 
     }
 
@@ -49,7 +53,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.Holder> {
         holder.ll_menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                menuselect(position);
 
             }
         });
@@ -59,6 +63,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.Holder> {
     public void menuselect(int position){
         switch (position){
             case 0:
+                Toast.makeText(context,"0입니다",Toast.LENGTH_LONG).show();
                 break;
             case 1:
                 break;

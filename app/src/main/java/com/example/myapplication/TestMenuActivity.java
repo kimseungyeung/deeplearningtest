@@ -61,7 +61,7 @@ public class TestMenuActivity  extends TabActivity implements View.OnClickListen
             md.add(mm);
         }
 
-        MenuAdapter mm = new MenuAdapter(md,R.layout.item_left_menu,R.layout.item_left_sub_menu);
+        MenuAdapter mm = new MenuAdapter(md,R.layout.item_left_menu,R.layout.item_left_sub_menu,this);
         leftmenu.setAdapter(mm);
         leftmenu.setLayoutManager(new LinearLayoutManager(this));
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);

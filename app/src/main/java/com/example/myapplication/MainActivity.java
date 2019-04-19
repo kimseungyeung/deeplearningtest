@@ -1,14 +1,19 @@
 package com.example.myapplication;
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -36,10 +41,15 @@ import java.util.logging.Logger;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     String filePath;
     SentenceIterator iter;
-    Button btn_learning, btn_text;
+    Button btn_learning, btn_text,btn_settting,btn_settingfile;
     EditText edt_word;
     TextView tv_result;
     Word2Vec vec = null;
+    int layersize=100;
+    int windowsize=5;
+    int minword=5;
+    int itter=1;
+    String filename="test";
         Collection<String> lst=null;
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +65,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         edt_word = (EditText) findViewById(R.id.edt_word);
         btn_learning = (Button) findViewById(R.id.btn_learning);
         btn_text = (Button) findViewById(R.id.btn_text);
+        btn_settting=(Button)findViewById(R.id.btn_setting);
+        btn_settingfile =(Button)findViewById(R.id.btn_setting_file);
+        btn_settting.setOnClickListener(this);
+        btn_settingfile.setOnClickListener(this);
         btn_text.setOnClickListener(this);
         btn_learning.setOnClickListener(this);
+        SharedPreferences sf = getSharedPreferences("setting_value", MODE_PRIVATE);
+        //text라는 key에 저장된 값이 있는지 확인. 아무값도 들어있지 않으면 ""를 반환
+        layersize = Integer.parseInt(sf.getString("layersize", "100").trim());
+        windowsize = Integer.parseInt(sf.getString("windowsize", "5").trim());
+        minword =Integer.parseInt(sf.getString("minword", "5").trim());
+        itter=Integer.parseInt( sf.getString("iter", "1").trim());
+        filename=sf.getString("filename", "test").trim();
+        String path =Environment.getExternalStorageDirectory()+"/deeplearning"; //폴더 경로
+        File Folder = new File(path);
+
+        // 해당 디렉토리가 없을경우 디렉토리를 생성합니다.
+        if (!Folder.exists()) {
+            Folder.mkdir();
+        }
         new LoadingTask().execute();
     }
 
@@ -67,18 +95,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new LearningTask().execute();
                 break;
             case R.id.btn_text:
+
                 if (vec != null) {
                     String word = edt_word.getText().toString().trim();
                     try {
                         lst = vec.wordsNearestSum(word, 10);
-
+                    Collection<String> ll = vec.wordsNearest(word,10);
                         tv_result.setText("결과: " + lst.toString());
+                        tv_result.append("\n결과2: "+ll.toString());
                     } catch (NullPointerException e) {
                         Toast.makeText(this, "결과값이 없습니다.", Toast.LENGTH_LONG).show();
                     }
 
 
                 }
+                break;
+            case R.id.btn_setting:
+                setDialog();
+                break;
+            case R.id.btn_setting_file:
+                setfileDialog();
                 break;
         }
     }
@@ -88,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Uri url = Uri.parse("android.resource://" + getPackageName() + "/" + "raw/" + "resulttext");
         String path = "";
 //                File localFile = new File(Environment.getExternalStorageDirectory(), "raw_sentences.txt");
-        File localFile = new File(Environment.getExternalStorageDirectory(), "test.txt");
+        File localFile = new File(Environment.getExternalStorageDirectory()+"/deeplearning", filename+".txt");
         iter = new FileSentenceIterator(localFile);
         TokenizerFactory t = new DefaultTokenizerFactory();
 
@@ -96,12 +132,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        log.info("Building model....");
         try {
             vec = new Word2Vec.Builder()
-                    .minWordFrequency(5)
-                    .iterations(1)
-                    .layerSize(100)
-//                    .seed(42)
-                    .windowSize(5)
+                    .minWordFrequency(minword)
+                    .iterations(itter)
+                    .layerSize(layersize)
+                    .windowSize(windowsize)
                     .iterate(iter)
+                    .seed(42)
                     .tokenizerFactory(t)
                     .build();
 //            vec = new Word2Vec.Builder()
@@ -117,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             vec.fit();
 //                    WordVectorSerializer.writeWord2VecModel(vec, Environment.getExternalStorageDirectory().getAbsoluteFile()+"/"+"pathToSaveModel.txt");
-            File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "pathToSaveModel.txt");
+            File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
             if (f != null) {
                 if (f.exists()) {
                     f.delete();
@@ -182,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "pathToSaveModel.txt");
                 try {
                     if (f != null && f.exists()) {
-                        vec = WordVectorSerializer.loadFullModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "pathToSaveModel.txt");
+                        vec = WordVectorSerializer.loadFullModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
                     }
                 } catch (FileNotFoundException e) {
 
@@ -198,5 +234,115 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 asyncDialog.dismiss();
             }
         }
+    }
+    public void setDialog() {
+        android.support.v7.app.AlertDialog.Builder dialogBuilder = new android.support.v7.app.AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.setting_dialog, null);
+        dialogBuilder.setView(view);
+
+        final android.support.v7.app.AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        alertDialog.setCancelable(false);
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        final EditText edt_layersize= (EditText)view.findViewById(R.id.edt_layersize);
+        final EditText edt_windowsize= (EditText)view.findViewById(R.id.edt_windowsize);
+        final EditText edt_minword= (EditText)view.findViewById(R.id.edt_minword);
+        final EditText edt_iter =(EditText)view.findViewById(R.id.edt_iter);
+        Button btn_set=(Button)view.findViewById(R.id.btn_set);
+        Button btn_cancel=(Button)view.findViewById(R.id.btn_cancle);
+        edt_layersize.setText(String.valueOf(layersize));
+        edt_windowsize.setText(String.valueOf(windowsize));
+        edt_minword.setText(String.valueOf(minword));
+        edt_iter.setText(String.valueOf(itter));
+        btn_set.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String slayersize=edt_layersize.getText().toString().trim();
+                String swindowsize=edt_windowsize.getText().toString().trim();
+                String sminword=edt_minword.getText().toString().trim();
+                String siter=edt_iter.getText().toString().trim();
+                if(!slayersize.equals("")) {
+                    layersize = Integer.parseInt(slayersize);
+                }
+                if(!swindowsize.equals("")) {
+                    windowsize = Integer.parseInt(swindowsize);
+                }
+                if(!sminword.equals("")) {
+                    minword = Integer.parseInt(sminword);
+                }
+                if(!siter.equals("")) {
+                    itter = Integer.parseInt(siter);
+                }
+                save_setting(slayersize,swindowsize,siter,sminword);
+                alertDialog.cancel();
+            }
+        });
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.cancel();
+            }
+        });
+        alertDialog.show();
+    }
+    public void setfileDialog() {
+        android.support.v7.app.AlertDialog.Builder dialogBuilder = new android.support.v7.app.AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.setting_file_dialog, null);
+        dialogBuilder.setView(view);
+
+        final android.support.v7.app.AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        alertDialog.setCancelable(false);
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        final EditText edt_filename= (EditText)view.findViewById(R.id.edt_fielname);
+        Button btn_set=(Button)view.findViewById(R.id.btn_set);
+        Button btn_cancel=(Button)view.findViewById(R.id.btn_cancle);
+        edt_filename.setText(filename);
+
+        btn_set.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String sfilename=edt_filename.getText().toString().trim();
+
+                if(!sfilename.equals("")) {
+                    filename = sfilename;
+                }
+
+              save_setting2(filename);
+                alertDialog.cancel();
+            }
+        });
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.cancel();
+            }
+        });
+        alertDialog.show();
+    }
+    public void save_setting(String layersize, String windowsize,String iter,String minword) {
+        SharedPreferences sharedPreferences = getSharedPreferences("setting_value", MODE_PRIVATE);
+
+        //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+//        String text = edt_email.getText().toString(); // 사용자가 입력한 저장할 데이터
+        editor.putString("layersize", layersize); // key, value를 이용하여 저장하는 형태
+        editor.putString("windowsize", windowsize);
+        editor.putString("iter", iter);
+        editor.putString("minword",minword);
+        editor.commit();
+    }
+    public void save_setting2(String fname){
+        SharedPreferences sharedPreferences = getSharedPreferences("setting_value", MODE_PRIVATE);
+
+        //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString("filename",fname);
+        editor.commit();
     }
 }
