@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .iterate(iter)
                     .seed(42)
                     .tokenizerFactory(t)
+                    .batchSize(1000)
                     .build();
 //            vec = new Word2Vec.Builder()
 //                    .minWordFrequency(5)
@@ -216,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected Boolean doInBackground(Integer... integers) {
             if (vec == null) {
-                File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "pathToSaveModel.txt");
+                File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
                 try {
                     if (f != null && f.exists()) {
                         vec = WordVectorSerializer.loadFullModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
