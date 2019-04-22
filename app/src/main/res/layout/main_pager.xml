@@ -4,7 +4,8 @@
     android:id="@+id/drawer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="false">
+    android:fitsSystemWindows="false"
+    android:layout_gravity="center">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,48 +26,45 @@
                 android:textSize="40sp" />
 
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="20dip"
+            android:paddingRight="20dip">
+            <Button
+                android:id="@+id/btn_nopayment"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/nopayment_details"
+               />
+            <Button
+                android:id="@+id/btn_payment"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/payment_details"/>
+            <Button
+                android:id="@+id/btn_closeing"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/closeing_details"/>
+            <Button
+                android:id="@+id/btn_calendar"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/calendar_management"/>
 
+        </LinearLayout>
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dip"
-            android:background="@color/black" />
+            android:layout_height="match_parent"
+            android:background="@color/skyblue" />
 
-        <TabHost
-            android:id="@android:id/tabhost"
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="9">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dip"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical">
-
-                    <TabWidget
-                        android:id="@android:id/tabs"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dip"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-                    </TabWidget>
-                </LinearLayout>
-
-                <FrameLayout
-                    android:id="@android:id/tabcontent"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dip"
-                    android:layout_weight="9">
-
-                </FrameLayout>
-            </LinearLayout>
-        </TabHost>
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

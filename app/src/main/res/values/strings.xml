@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="payment_details">결제명세</string>
+    <string name="nopayment_details">미결명세</string>
+    <string name="closeing_details">종결명세</string>
+    <string name="calendar_management">일정관리</string>
 </resources>
