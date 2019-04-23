@@ -186,7 +186,15 @@ public void popup1(){
         nadater.setItemClick(new NopayAdapter.ItemClick() {
                                  @Override
                                  public void onClick(View view, int position, NoPayData np) {
-                                     Toast.makeText(getApplicationContext(),np.getStatetext(),Toast.LENGTH_LONG).show();
+
+                                     switch (view.getId()){
+                                         case R.id.iv_stype:
+                                             Toast.makeText(getApplicationContext(),String.valueOf(position)+"이미지",Toast.LENGTH_LONG).show();
+                                             break;
+                                         case R.id.ll_text:
+                                             Toast.makeText(getApplicationContext(),np.getStatetext(),Toast.LENGTH_LONG).show();
+                                             break;
+                                     }
                                  }
                              });
 

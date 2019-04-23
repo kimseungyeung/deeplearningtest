@@ -30,6 +30,7 @@
    </RelativeLayout>
 
     <LinearLayout
+        android:id="@+id/ll_text"
         android:layout_width="0dip"
         android:layout_height="match_parent"
         android:layout_weight="5"
