@@ -9,6 +9,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -73,6 +75,12 @@ public class TestMenuActivity  extends AppCompatActivity implements View.OnClick
             }
         }
         MenuAdapter mm = new MenuAdapter(md,R.layout.item_left_menu,R.layout.item_left_sub_menu,this);
+        mm.setItemClick(new MenuAdapter.ItemClick() {
+            @Override
+            public void onClick(View view, int position) {
+                Toast.makeText(getApplicationContext(),String.valueOf(position),Toast.LENGTH_LONG).show();
+            }
+        });
         leftmenu.setAdapter(mm);
         leftmenu.setLayoutManager(new LinearLayoutManager(this));
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -153,6 +161,12 @@ public void popup1(){
             int mWidthPixels = realSize.x;
             int mHeightPixels = realSize.y;
 
+        DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
+
+        int width = dm.widthPixels;
+
+        int height = dm.heightPixels;
+
 
         //  LayoutInflater 객체와 시킴
         LayoutInflater inflater = (LayoutInflater) this
@@ -161,15 +175,22 @@ public void popup1(){
         View layout = inflater.inflate(R.layout.nopayment_activity,
                 (ViewGroup) findViewById(R.id.ll_popup));
 
-         pwindo = new PopupWindow(layout,mWidthPixels-100,
-                 mHeightPixels-550,true);
+         pwindo = new PopupWindow(layout, mWidthPixels-100,
+                 mHeightPixels-550,false);
         pwindo.setOutsideTouchable(true);
-        pwindo.setAnimationStyle(0);
+        pwindo.setAnimationStyle(-1);
         Button btn_view = (Button) layout.findViewById(R.id.btn_view);
         Button btn_update =(Button)layout.findViewById(R.id.btn_update);
         RecyclerView ll =(RecyclerView)layout.findViewById(R.id.recycle_list);
         NopayAdapter nadater =new NopayAdapter(nd,R.layout.item_popup1,this);
-        ll.setAdapter(nadater);
+        nadater.setItemClick(new NopayAdapter.ItemClick() {
+                                 @Override
+                                 public void onClick(View view, int position, NoPayData np) {
+                                     Toast.makeText(getApplicationContext(),np.getStatetext(),Toast.LENGTH_LONG).show();
+                                 }
+                             });
+
+                ll.setAdapter(nadater);
         ll.setLayoutManager(new LinearLayoutManager(this));
 
         btn_view.setOnClickListener(new View.OnClickListener() {
@@ -186,10 +207,11 @@ public void popup1(){
                 pwindo.dismiss();
             }
         });
-        View view =(View)btn_nopay;
-        //View view = getWindow().getDecorView() ;
 
-        pwindo.showAsDropDown(layout,Gravity.CENTER,0,0);
+        //View view = getWindow().getDecorView() ;
+        pwindo.showAtLocation(layout,Gravity.CENTER,0,100);
+        pwindo.showAsDropDown(layout);
+
 
 
 
@@ -202,76 +224,5 @@ public void popup1(){
 
 
 }
-    public class NopayAdapter extends RecyclerView.Adapter<NopayAdapter.Holder> {
 
-        private int itemlayout;
-        private int selectidx=0;
-        private ArrayList<NoPayData> noPayDataArrayList;
-        public Context context;
-        Integer[] iconlist = {R.drawable.shapeovared, R.drawable.shapeovayellow, R.drawable.shapeovablue, R.drawable.shapeovagreen};
-        String[]statelist={"미이행","지연제출","대상","이행"};
-        public  NopayAdapter(ArrayList<NoPayData>ndaalist, int ilayout, Context ctx){
-            this.noPayDataArrayList=ndaalist;
-            this.itemlayout=ilayout;
-            this.context =ctx;
-
-        }
-
-
-        @NonNull
-        @Override
-        public NopayAdapter.Holder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-            View view = LayoutInflater.from(viewGroup.getContext()).inflate(itemlayout,viewGroup,false);
-            return new NopayAdapter.Holder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(Holder holder, final int position) {
-            NoPayData md= noPayDataArrayList.get(position);
-           holder.iv_stype.setImageDrawable(getResources().getDrawable(iconlist[md.getStatetype()]));
-           holder.tv_stype.setText("[중간보고 : "+statelist[md.getStatetype()]+"]");
-           holder.tv_snum.setText(String.valueOf(md.getStatenum()));
-           holder.tv_sname.setText(md.getStatename());
-           holder.tv_cname.setText(md.getCustomername());
-           holder.tv_st.setText(md.getStatetext());
-           holder.tv_rm.setText("보상: "+md.getRewardman()+" / "+"조사자: "+md.getResearchman());
-
-        }
-
-
-
-
-        @Override
-        public int getItemCount() {
-            return noPayDataArrayList.size();
-        }
-
-
-
-        @Override
-        public int getItemViewType(int position) {
-            return super.getItemViewType(position);
-        }
-
-        //홀더를 셋팅
-        public  class Holder extends RecyclerView.ViewHolder{
-         ImageView iv_stype;
-         TextView tv_snum,tv_stype,tv_sname,tv_cname,tv_st,tv_rm;
-
-            public Holder(@NonNull View itemView) {
-                super(itemView);
-                iv_stype=(ImageView)itemView.findViewById(R.id.iv_stype);
-               tv_snum=(TextView)itemView.findViewById(R.id.tv_snum);
-                tv_stype =(TextView)itemView.findViewById(R.id.tv_stype);
-               tv_sname=(TextView)itemView.findViewById(R.id.tv_sname);
-               tv_cname=(TextView)itemView.findViewById(R.id.tv_cname);
-               tv_st=(TextView)itemView.findViewById(R.id.tv_st);
-               tv_rm=(TextView)itemView.findViewById(R.id.tv_rm);
-
-            }
-
-
-        }
-
-    }
 }

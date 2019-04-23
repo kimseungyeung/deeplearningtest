@@ -14,17 +14,15 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.Holder> {
-
+    private ItemClick itemClick;
     private int itemlayout;
     private int itemsublayout;
     private int selectidx=0;
     private ArrayList<MenuData> mlist;
-    private ItemClick itemClick;
+
     private MenuAdapter mm;
     public Context context;
-    public interface ItemClick {
-        public void onClick(View view,int position);
-    }
+
     public void onClick(View view,int position){
         int d =0;
     }
@@ -36,8 +34,13 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.Holder> {
         this.context =ctx;
 
     }
-
-
+    public interface ItemClick {
+        public void onClick(View view,int position);
+    }
+    //아이템 클릭시 실행 함수 등록 함수
+    public void setItemClick(ItemClick itemClick) {
+        this.itemClick = itemClick;
+    }
     @NonNull
     @Override
     public Holder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
@@ -53,28 +56,14 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.Holder> {
         holder.ll_menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                menuselect(position);
+                itemClick.onClick(v,position);
 
             }
         });
 
     }
 
-    public void menuselect(int position){
-        switch (position){
-            case 0:
-                Toast.makeText(context,"0입니다",Toast.LENGTH_LONG).show();
-                break;
-            case 1:
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-            case 4:
-                break;
-        }
-    }
+
     public int getSelectidx() {
         return this.selectidx;
     }
