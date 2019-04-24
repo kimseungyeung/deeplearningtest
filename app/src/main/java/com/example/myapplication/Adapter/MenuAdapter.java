@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.Adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -9,7 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.example.myapplication.Data.MenuData;
+import com.example.myapplication.R;
 
 import java.util.ArrayList;
 
