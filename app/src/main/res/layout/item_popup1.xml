@@ -12,12 +12,12 @@
        android:layout_weight="1"
        android:padding="1dip"
        >
+
        <ImageView
            android:id="@+id/iv_stype"
            android:layout_width="match_parent"
            android:layout_height="match_parent"
-           android:layout_centerInParent="true"
-           android:src="@drawable/shapeovayellow"/>
+           android:src="@drawable/shapeovayellow" />
        <TextView
            android:id="@+id/tv_snum"
            android:layout_width="wrap_content"
@@ -26,7 +26,14 @@
            android:textSize="30sp"
            android:textColor="@color/White"
            android:layout_centerInParent="true"
-           android:text="36"/>
+           android:text=""/>
+       <ImageView
+           android:id="@+id/iv_check"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_centerInParent="true"
+           android:src="@drawable/checked"
+           android:visibility="visible"/>
    </RelativeLayout>
 
     <LinearLayout

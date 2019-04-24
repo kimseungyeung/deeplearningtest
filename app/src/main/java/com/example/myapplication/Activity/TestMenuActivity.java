@@ -1,9 +1,9 @@
-package com.example.myapplication;
+package com.example.myapplication.Activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -17,11 +17,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.myapplication.Adapter.MenuAdapter;
+import com.example.myapplication.Adapter.NopayAdapter;
+import com.example.myapplication.Data.MenuData;
+import com.example.myapplication.Data.NoPayData;
+import com.example.myapplication.R;
 
 import java.util.ArrayList;
 
@@ -29,15 +35,17 @@ public class TestMenuActivity  extends AppCompatActivity implements View.OnClick
 
     Context context;
     DrawerLayout drawer;
-    Button  btn_left_menu,btn_inmenu,btn_nopay,btn_pay,btn_closeing,btn_calendar;
+    Button btn_inmenu,btn_nopay,btn_pay,btn_closeing,btn_calendar;
+    ImageButton imbtn_left_menu;
     RecyclerView leftmenu;
     ImageView iv_profile_picture;
     TextView tv_nickname;
-    String[] menulist = {"메뉴1", "메뉴2", "메뉴3", "메뉴4", "메뉴5"};
+    String[] menulist = {"차트", "차트2", "메뉴3", "메뉴4", "메뉴5"};
     ArrayList<MenuData> md;
     ArrayList<NoPayData> nd;
     int nopaycount=0;
     PopupWindow pwindo;
+    int selectidx=0;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,8 +53,9 @@ public class TestMenuActivity  extends AppCompatActivity implements View.OnClick
         component();
     }
     public void component(){
-        btn_left_menu = (Button) findViewById(R.id.btn_left_menu);
-        btn_left_menu.setOnClickListener(this);
+        context=this;
+        imbtn_left_menu = (ImageButton) findViewById(R.id.imbtn_left_menu);
+        imbtn_left_menu.setOnClickListener(this);
         drawer = (DrawerLayout) findViewById(R.id.drawer);
         leftmenu = (RecyclerView) findViewById(R.id.left_menu);
         iv_profile_picture = (ImageView) findViewById(R.id.iv_profile_picture);
@@ -78,14 +87,31 @@ public class TestMenuActivity  extends AppCompatActivity implements View.OnClick
         mm.setItemClick(new MenuAdapter.ItemClick() {
             @Override
             public void onClick(View view, int position) {
-                Toast.makeText(getApplicationContext(),String.valueOf(position),Toast.LENGTH_LONG).show();
+                switch (position){
+                    case 0:
+                        Intent i = new Intent(context,ChartActivity.class);
+                        startActivity(i);
+                        break;
+                    case 1:
+                        Intent i2 = new Intent(context,Chart2Activity.class);
+                        startActivity(i2);
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+                    case 5:
+                        break;
+                }
             }
         });
         leftmenu.setAdapter(mm);
         leftmenu.setLayoutManager(new LinearLayoutManager(this));
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         nd= new ArrayList<>();
-        NoPayData ndd = new NoPayData(30,0,"보고서반송","13-10-7777 김승영","두개골절","김보현","김현수",false);
+        NoPayData ndd = new NoPayData(30,0,"보고서반송","13-10-7777 김승영","두개골절","김보현","김현수",true);
         NoPayData nd2 = new NoPayData(16,1,"종결보고서 제출","13-10-574 박석원","요추.간판의","최수열","박창휘",false);
         NoPayData nd3 = new NoPayData(59,3,"중간보고서 제출","13-11-2355 김규종","폐혈성 쇼크","김시현","김무열",false);
         NoPayData nd4 = new NoPayData(41,1,"고객면담","13-16-3455 최현성","경추간판전위","김화연","김무안",false);
@@ -112,7 +138,7 @@ public class TestMenuActivity  extends AppCompatActivity implements View.OnClick
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btn_left_menu:
+            case R.id.imbtn_left_menu:
                 drawer.openDrawer(GravityCompat.END);
                 break;
             case R.id.btn_inmenu:
@@ -182,22 +208,27 @@ public void popup1(){
         Button btn_view = (Button) layout.findViewById(R.id.btn_view);
         Button btn_update =(Button)layout.findViewById(R.id.btn_update);
         RecyclerView ll =(RecyclerView)layout.findViewById(R.id.recycle_list);
-        NopayAdapter nadater =new NopayAdapter(nd,R.layout.item_popup1,this);
+        final NopayAdapter nadater =new NopayAdapter(nd,R.layout.item_popup1,this);
         nadater.setItemClick(new NopayAdapter.ItemClick() {
                                  @Override
                                  public void onClick(View view, int position, NoPayData np) {
-
                                      switch (view.getId()){
-                                         case R.id.iv_stype:
-                                             Toast.makeText(getApplicationContext(),String.valueOf(position)+"이미지",Toast.LENGTH_LONG).show();
-                                             break;
                                          case R.id.ll_text:
                                              Toast.makeText(getApplicationContext(),np.getStatetext(),Toast.LENGTH_LONG).show();
+                                             Intent i = new Intent(context,DataViewActivity.class);
+                                             i.putExtra("nopay",np);
+                                             startActivity(i);
+                                             break;
+                                         case R.id.iv_stype:
+                                             Toast.makeText(getApplicationContext(),String.valueOf(position),Toast.LENGTH_LONG).show();
+//                                             selectidx=position;
+                                             nadater.clickicon(position);
                                              break;
                                      }
+
+
                                  }
                              });
-
                 ll.setAdapter(nadater);
         ll.setLayoutManager(new LinearLayoutManager(this));
 
@@ -217,7 +248,7 @@ public void popup1(){
         });
 
         //View view = getWindow().getDecorView() ;
-        pwindo.showAtLocation(layout,Gravity.CENTER,0,100);
+        pwindo.showAtLocation(layout,Gravity.CENTER,0,200);
         pwindo.showAsDropDown(layout);
 
 
@@ -233,4 +264,13 @@ public void popup1(){
 
 }
 
+    @Override
+    public void onBackPressed() {
+
+        if(drawer.isDrawerOpen(GravityCompat.END)){
+            drawer.closeDrawer(Gravity.RIGHT);
+        }else{
+            super.onBackPressed();
+        }
+    }
 }
