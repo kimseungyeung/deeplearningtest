@@ -1,343 +1,278 @@
 package com.example.myapplication.Activity;
 
-import android.app.ProgressDialog;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.myapplication.Adapter.MenuAdapter;
+import com.example.myapplication.Adapter.NopayAdapter;
+import com.example.myapplication.Data.MenuData;
+import com.example.myapplication.Data.NoPayData;
 import com.example.myapplication.R;
 
-import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
-import org.deeplearning4j.models.word2vec.Word2Vec;
-import org.deeplearning4j.text.sentenceiterator.FileSentenceIterator;
-import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
-import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Collection;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    String filePath;
-    SentenceIterator iter;
-    Button btn_learning, btn_text,btn_settting,btn_settingfile;
-    EditText edt_word;
-    TextView tv_result;
-    Word2Vec vec = null;
-    int layersize=100;
-    int windowsize=5;
-    int minword=5;
-    int itter=1;
-    String filename="test";
-        Collection<String> lst=null;
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_main);
 
-            component();
-
+    Context context;
+    DrawerLayout drawer;
+    Button btn_inmenu,btn_nopay,btn_pay,btn_closeing,btn_calendar;
+    ImageButton imbtn_left_menu;
+    RecyclerView leftmenu;
+    ImageView iv_profile_picture;
+    TextView tv_nickname;
+    String[] menulist = {"차트", "차트2", "deeplearning", "메뉴4", "메뉴5"};
+    ArrayList<MenuData> md;
+    ArrayList<NoPayData> nd;
+    int nopaycount=0;
+    PopupWindow pwindo;
+    int selectidx=0;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main_pager);
+        component();
     }
-
-    public void component() {
-        tv_result = (TextView) findViewById(R.id.tv_result);
-        edt_word = (EditText) findViewById(R.id.edt_word);
-        btn_learning = (Button) findViewById(R.id.btn_learning);
-        btn_text = (Button) findViewById(R.id.btn_text);
-        btn_settting=(Button)findViewById(R.id.btn_setting);
-        btn_settingfile =(Button)findViewById(R.id.btn_setting_file);
-        btn_settting.setOnClickListener(this);
-        btn_settingfile.setOnClickListener(this);
-        btn_text.setOnClickListener(this);
-        btn_learning.setOnClickListener(this);
-        SharedPreferences sf = getSharedPreferences("setting_value", MODE_PRIVATE);
-        //text라는 key에 저장된 값이 있는지 확인. 아무값도 들어있지 않으면 ""를 반환
-        layersize = Integer.parseInt(sf.getString("layersize", "100").trim());
-        windowsize = Integer.parseInt(sf.getString("windowsize", "5").trim());
-        minword =Integer.parseInt(sf.getString("minword", "5").trim());
-        itter=Integer.parseInt( sf.getString("iter", "1").trim());
-        filename=sf.getString("filename", "test").trim();
-        String path =Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/"; //폴더 경로
-        File Folder = new File(path);
-
-        // 해당 디렉토리가 없을경우 디렉토리를 생성합니다.
-        if (!Folder.exists()) {
-            Folder.mkdir();
+    public void component(){
+        context=this;
+        imbtn_left_menu = (ImageButton) findViewById(R.id.imbtn_left_menu);
+        imbtn_left_menu.setOnClickListener(this);
+        drawer = (DrawerLayout) findViewById(R.id.drawer);
+        leftmenu = (RecyclerView) findViewById(R.id.left_menu);
+        iv_profile_picture = (ImageView) findViewById(R.id.iv_profile_picture);
+        tv_nickname = (TextView) findViewById(R.id.tv_nickname_left);
+        btn_inmenu = (Button) findViewById(R.id.btn_inmenu);
+        btn_pay=(Button)findViewById(R.id.btn_payment);
+        btn_nopay=(Button)findViewById(R.id.btn_nopayment);
+        btn_closeing=(Button)findViewById(R.id.btn_closeing);
+        btn_calendar=(Button)findViewById(R.id.btn_calendar);
+        btn_pay.setOnClickListener(this);
+        btn_nopay.setOnClickListener(this);
+        btn_closeing.setOnClickListener(this);
+        btn_calendar.setOnClickListener(this);
+        btn_inmenu.setOnClickListener(this);
+        if(md==null) {
+            md = new ArrayList<>();
+            boolean df = true;
+            for (int i = 0; i < menulist.length; i++) {
+                if (i == 0 || i == 2) {
+                    df = false;
+                } else {
+                    df = true;
+                }
+                MenuData mm = new MenuData(menulist[i], R.drawable.ic_launcher_foreground, df);
+                md.add(mm);
+            }
         }
-        new LoadingTask().execute();
+        MenuAdapter mm = new MenuAdapter(md,R.layout.item_left_menu,R.layout.item_left_sub_menu,this);
+        mm.setItemClick(new MenuAdapter.ItemClick() {
+            @Override
+            public void onClick(View view, int position) {
+                switch (position){
+                    case 0:
+                        Intent i = new Intent(context,ChartActivity.class);
+                        startActivity(i);
+                        break;
+                    case 1:
+                        Intent i2 = new Intent(context,Chart2Activity.class);
+                        startActivity(i2);
+                        break;
+                    case 2:
+                        Intent i3 = new Intent(context,DeepLearningActivity.class);
+                        startActivity(i3);
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+                    case 5:
+                        break;
+                }
+            }
+        });
+        leftmenu.setAdapter(mm);
+        leftmenu.setLayoutManager(new LinearLayoutManager(this));
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        nd= new ArrayList<>();
+        NoPayData ndd = new NoPayData(30,0,"보고서반송","13-10-7777 김승영","두개골절","김보현","김현수",true);
+        NoPayData nd2 = new NoPayData(16,1,"종결보고서 제출","13-10-574 박석원","요추.간판의","최수열","박창휘",false);
+        NoPayData nd3 = new NoPayData(59,3,"중간보고서 제출","13-11-2355 김규종","폐혈성 쇼크","김시현","김무열",false);
+        NoPayData nd4 = new NoPayData(41,1,"고객면담","13-16-3455 최현성","경추간판전위","김화연","김무안",false);
+        NoPayData nd5 = new NoPayData(24,2,"보고서반송","13-13-4355 이제성","간암","김철수","박영희",false);
+        NoPayData nd6 = new NoPayData(31,1,"종결보고서 제출","13-14-2355 이현우","폐암","김화연","최현희",false);
+        NoPayData nd7 = new NoPayData(13,3,"고객면담","13-13-4255 박현철","심근경색","김지연","박찬수",false);
+
+        nd.add(ndd);
+        nd.add(nd2);
+        nd.add(nd3);
+        nd.add(nd4);
+        nd.add(nd5);
+        nd.add(nd6);
+        nd.add(nd7);
+        if(nopaycount==0) {
+            for (int i = 0; i < nd.size(); i++) {
+                if (nd.get(i).getCheckview() == false) {
+                    nopaycount++;
+                }
+            }
+        }
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btn_learning:
-                new LearningTask().execute();
+            case R.id.imbtn_left_menu:
+                drawer.openDrawer(GravityCompat.END);
                 break;
-            case R.id.btn_text:
-
-                if (vec != null) {
-                    String word = edt_word.getText().toString();
-                    try {
-                        lst = vec.wordsNearestSum(word, 10);
-                    Collection<String> ll = vec.wordsNearest(word,10);
-                        tv_result.setText("결과: " + lst.toString());
-                        tv_result.append("\n결과2: "+ll.toString());
-                    } catch (NullPointerException e) {
-                        Toast.makeText(this, "결과값이 없습니다.", Toast.LENGTH_LONG).show();
-                    }
-
-
-                }
+            case R.id.btn_inmenu:
+                drawer.closeDrawer(Gravity.RIGHT);
                 break;
-            case R.id.btn_setting:
-                setDialog();
+
+            case R.id.btn_nopayment:
+
+                    popup1();
+
                 break;
-            case R.id.btn_setting_file:
-                setfileDialog();
+            case R.id.btn_payment:
+
+//                PopupWindow popup = new PopupWindow(v);
+//                LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//                //팝업으로 띄울 커스텀뷰를 설정하고
+//                View view = inflater.inflate(R.layout.test_popup_window, null);
+//                popup.setContentView(view);
+//                //팝업의 크기 설정
+//                popup.setWindowLayoutMode(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+//                //팝업 뷰 터치 되도록
+//                popup.setTouchable(true);
+//                //팝업 뷰 포커스도 주고
+//                popup.setFocusable(true);
+//                //팝업 뷰 이외에도 터치되게 (터치시 팝업 닫기 위한 코드)
+//                popup.setOutsideTouchable(true);
+//                popup.setBackgroundDrawable(new BitmapDrawable());
+//                //인자로 넘겨준 v 아래로 보여주기
+//                popup.showAsDropDown(v);
+                break;
+            case R.id.btn_closeing:
+                break;
+            case R.id.btn_calendar:
                 break;
         }
     }
+public void popup1(){
+    try {
+        WindowManager w = getWindowManager();
+        Display d = w.getDefaultDisplay();
 
-    public void learning() {
-       lst = null;
-        Uri url = Uri.parse("android.resource://" + getPackageName() + "/" + "raw/" + "resulttext");
-        String path = "";
-//                File localFile = new File(Environment.getExternalStorageDirectory(), "raw_sentences.txt");
 
-        File localFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/", filename+".txt");
-        iter = new FileSentenceIterator(localFile);
-        TokenizerFactory t = new DefaultTokenizerFactory();
 
-        t.setTokenPreProcessor(new CommonPreprocessor());
-//        log.info("Building model....");
-        try {
-            vec = new Word2Vec.Builder()
-                    .minWordFrequency(minword) //등장 횟수가 minword 이하인 단어는 무시
-                    .iterations(itter)   //학습반복횟수
-                    .layerSize(layersize)
-                    .windowSize(windowsize)
-                    .iterate(iter)
-                    .seed(42)
-                    .tokenizerFactory(t)
-                    .batchSize(1000)
-                    .build();
-//            vec = new Word2Vec.Builder()
-//                    .minWordFrequency(5)
-//                    .iterations(1)
-//                    .layerSize(100)
-//                    .seed(42)
-//                    .windowSize(5)
-//                    .iterate(iter)
-//                    .tokenizerFactory(t)
-//                    .batchSize(1000) // 사전을 구축할때 한번에 읽을 단어 수
-//                    .build();
+            Point realSize = new Point();
+            Display.class.getMethod("getRealSize", Point.class).invoke(d, realSize);
+            int mWidthPixels = realSize.x;
+            int mHeightPixels = realSize.y;
 
-            vec.fit();
-//                    WordVectorSerializer.writeWord2VecModel(vec, Environment.getExternalStorageDirectory().getAbsoluteFile()+"/"+"pathToSaveModel.txt");
-            File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
-            if (f != null) {
-                if (f.exists()) {
-                    f.delete();
-                }
-            }
-            WordVectorSerializer.writeFullModel(vec, Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
-        }catch (IllegalStateException e){
-            Toast.makeText(this,"학습오류 해당파일을 확인해주세요",Toast.LENGTH_LONG).show();
-        }
+        DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
 
-    }
+        int width = dm.widthPixels;
 
-    public class LearningTask extends AsyncTask<Integer, Integer, Boolean> {
-        ProgressDialog asyncDialog = null;
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
+        int height = dm.heightPixels;
 
-            if (!isFinishing() && this != null) {
-                asyncDialog = new ProgressDialog(MainActivity.this);
-                asyncDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                asyncDialog.setMessage("학습 중 입니다...");
-                asyncDialog.setCancelable(false);
-                asyncDialog.show();
 
-            }
-        }
+        //  LayoutInflater 객체와 시킴
+        LayoutInflater inflater = (LayoutInflater) this
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        @Override
-        protected Boolean doInBackground(Integer... integers) {
-            learning();
-            return null;
-        }
+        View layout = inflater.inflate(R.layout.nopayment_activity,
+                (ViewGroup) findViewById(R.id.ll_popup));
 
-        @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
-            if (asyncDialog.isShowing()) {
-                asyncDialog.dismiss();
-            }
-        }
-    }
-    public class LoadingTask extends AsyncTask<Integer, Integer, Boolean> {
-        ProgressDialog asyncDialog = null;
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
+         pwindo = new PopupWindow(layout, mWidthPixels-100,
+                 mHeightPixels-550,false);
+        pwindo.setOutsideTouchable(true);
+        pwindo.setAnimationStyle(-1);
+        Button btn_view = (Button) layout.findViewById(R.id.btn_view);
+        Button btn_update =(Button)layout.findViewById(R.id.btn_update);
+        RecyclerView ll =(RecyclerView)layout.findViewById(R.id.recycle_list);
+        final NopayAdapter nadater =new NopayAdapter(nd,R.layout.item_popup1,this);
+        nadater.setItemClick(new NopayAdapter.ItemClick() {
+                                 @Override
+                                 public void onClick(View view, int position, NoPayData np) {
+                                     switch (view.getId()){
+                                         case R.id.ll_text:
+                                             Toast.makeText(getApplicationContext(),np.getStatetext(),Toast.LENGTH_LONG).show();
+                                             Intent i = new Intent(context,DataViewActivity.class);
+                                             i.putExtra("nopay",np);
+                                             startActivity(i);
+                                             break;
+                                         case R.id.iv_stype:
+                                             Toast.makeText(getApplicationContext(),String.valueOf(position),Toast.LENGTH_LONG).show();
+//                                             selectidx=position;
+                                             nadater.clickicon(position);
+                                             break;
+                                     }
 
-            if (!isFinishing() && this != null) {
-                asyncDialog = new ProgressDialog(MainActivity.this);
-                asyncDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                asyncDialog.setMessage("로딩 중 입니다...");
-                asyncDialog.setCancelable(false);
-                asyncDialog.show();
 
-            }
-        }
+                                 }
+                             });
+                ll.setAdapter(nadater);
+        ll.setLayoutManager(new LinearLayoutManager(this));
 
-        @Override
-        protected Boolean doInBackground(Integer... integers) {
-            if (vec == null) {
-                File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
-                try {
-                    if (f != null && f.exists()) {
-                        vec = WordVectorSerializer.loadFullModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
-                    }
-                } catch (FileNotFoundException e) {
-
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
-            if (asyncDialog.isShowing()) {
-                asyncDialog.dismiss();
-            }
-        }
-    }
-    public void setDialog() {
-        android.support.v7.app.AlertDialog.Builder dialogBuilder = new android.support.v7.app.AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View view = inflater.inflate(R.layout.setting_dialog, null);
-        dialogBuilder.setView(view);
-
-        final android.support.v7.app.AlertDialog alertDialog = dialogBuilder.create();
-        alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        alertDialog.setCancelable(false);
-        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        final EditText edt_layersize= (EditText)view.findViewById(R.id.edt_layersize);
-        final EditText edt_windowsize= (EditText)view.findViewById(R.id.edt_windowsize);
-        final EditText edt_minword= (EditText)view.findViewById(R.id.edt_minword);
-        final EditText edt_iter =(EditText)view.findViewById(R.id.edt_iter);
-        Button btn_set=(Button)view.findViewById(R.id.btn_set);
-        Button btn_cancel=(Button)view.findViewById(R.id.btn_cancle);
-        edt_layersize.setText(String.valueOf(layersize));
-        edt_windowsize.setText(String.valueOf(windowsize));
-        edt_minword.setText(String.valueOf(minword));
-        edt_iter.setText(String.valueOf(itter));
-        btn_set.setOnClickListener(new View.OnClickListener() {
+        btn_view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                String slayersize=edt_layersize.getText().toString().trim();
-                String swindowsize=edt_windowsize.getText().toString().trim();
-                String sminword=edt_minword.getText().toString().trim();
-                String siter=edt_iter.getText().toString().trim();
-                if(!slayersize.equals("")) {
-                    layersize = Integer.parseInt(slayersize);
-                }
-                if(!swindowsize.equals("")) {
-                    windowsize = Integer.parseInt(swindowsize);
-                }
-                if(!sminword.equals("")) {
-                    minword = Integer.parseInt(sminword);
-                }
-                if(!siter.equals("")) {
-                    itter = Integer.parseInt(siter);
-                }
-                save_setting(slayersize,swindowsize,siter,sminword);
-                alertDialog.cancel();
+                Toast.makeText(getApplicationContext(),"확대",Toast.LENGTH_LONG).show();
+                pwindo.dismiss();
             }
         });
-        btn_cancel.setOnClickListener(new View.OnClickListener() {
+        btn_update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                alertDialog.cancel();
+                Toast.makeText(getApplicationContext(),"update",Toast.LENGTH_LONG).show();
+                pwindo.dismiss();
             }
         });
-        alertDialog.show();
+
+        //View view = getWindow().getDecorView() ;
+        pwindo.showAtLocation(layout,Gravity.CENTER,0,200);
+        pwindo.showAsDropDown(layout);
+
+
+
+
+
+
+    } catch (Exception e) {
+        Toast.makeText(getApplicationContext(),e.getMessage().toString(),Toast.LENGTH_LONG).show();
+        e.printStackTrace();
     }
-    public void setfileDialog() {
-        android.support.v7.app.AlertDialog.Builder dialogBuilder = new android.support.v7.app.AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View view = inflater.inflate(R.layout.setting_file_dialog, null);
-        dialogBuilder.setView(view);
 
-        final android.support.v7.app.AlertDialog alertDialog = dialogBuilder.create();
-        alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        alertDialog.setCancelable(false);
-        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        final EditText edt_filename= (EditText)view.findViewById(R.id.edt_fielname);
-        Button btn_set=(Button)view.findViewById(R.id.btn_set);
-        Button btn_cancel=(Button)view.findViewById(R.id.btn_cancle);
-        edt_filename.setText(filename);
 
-        btn_set.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+}
 
-                String sfilename=edt_filename.getText().toString().trim();
+    @Override
+    public void onBackPressed() {
 
-                if(!sfilename.equals("")) {
-                    filename = sfilename;
-                }
-
-              save_setting2(filename);
-                alertDialog.cancel();
-            }
-        });
-        btn_cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                alertDialog.cancel();
-            }
-        });
-        alertDialog.show();
-    }
-    public void save_setting(String layersize, String windowsize,String iter,String minword) {
-        SharedPreferences sharedPreferences = getSharedPreferences("setting_value", MODE_PRIVATE);
-
-        //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-//        String text = edt_email.getText().toString(); // 사용자가 입력한 저장할 데이터
-        editor.putString("layersize", layersize); // key, value를 이용하여 저장하는 형태
-        editor.putString("windowsize", windowsize);
-        editor.putString("iter", iter);
-        editor.putString("minword",minword);
-        editor.commit();
-    }
-    public void save_setting2(String fname){
-        SharedPreferences sharedPreferences = getSharedPreferences("setting_value", MODE_PRIVATE);
-
-        //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        editor.putString("filename",fname);
-        editor.commit();
+        if(drawer.isDrawerOpen(GravityCompat.END)){
+            drawer.closeDrawer(Gravity.RIGHT);
+        }else{
+            super.onBackPressed();
+        }
     }
 }
