@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -26,10 +27,13 @@ import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class DeepLearningActivity extends AppCompatActivity implements View.OnClickListener {
     String filePath;
@@ -45,6 +49,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
     int seed=0;
     int batchsize=1000;
     String filename="test";
+    List<String>stopword;
         Collection<String> lst=null;
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +78,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         minword =Integer.parseInt(sf.getString("minword", "5").trim());
         itter=Integer.parseInt( sf.getString("iter", "1").trim());
         seed=Integer.parseInt( sf.getString("seed", "0").trim());
-        batchsize=Integer.parseInt( sf.getString("batch", "1000").trim());
+        batchsize=Integer.parseInt( sf.getString("batchsize", "512").trim());
         filename=sf.getString("filename", "test").trim();
         String path =Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/"; //폴더 경로
         File Folder = new File(path);
@@ -96,6 +101,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                 if (vec != null) {
                     String word = edt_word.getText().toString();
                     try {
+
                         lst = vec.wordsNearestSum(word, 10);
                     Collection<String> ll = vec.wordsNearest(word,10);
                         tv_result.setText("결과: " + lst.toString());
@@ -129,17 +135,32 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
 
         t.setTokenPreProcessor(new CommonPreprocessor());
 //        log.info("Building model....");
+        stopword=new ArrayList<>();
+        stopword.add(" ");
+        stopword.add(".");
+        stopword.add(",");
+        stopword.add("?");
+        stopword.add("\"");
+        stopword.add("?");
+        stopword.add(">");
+        stopword.add("<");
+        stopword.add("\\");
         try {
             vec = new Word2Vec.Builder()
                     .minWordFrequency(minword) //등장 횟수가 minword 이하인 단어는 무시
-                    .iterations(itter)   //학습반복횟수
+                    .iterations(1)   //학습반복횟수
                     .layerSize(layersize) //output layer size
                     .windowSize(windowsize)
                     .iterate(iter)
-                    .seed(seed)
+//                    .limitVocabularySize(1)  //사용하는 어휘수의 제한
+//                    .workers(4) //학습시 사용하는 쓰레드의 갯수
+//                    .useHierarchicSoftmax(true)
+//                    .useAdaGrad(true)
+//                    .seed(seed) //랜덤난수 적용
                     .tokenizerFactory(t)
+                    .epochs(5) //전체학습반복
                     .batchSize(batchsize)//사전 구축할때 한번에 읽을 단어 수
-
+                    .stopWords(stopword) //학습할때 무시하는 단어의 리스트
                    .build();
 //            vec = new Word2Vec.Builder()
 //                    .minWordFrequency(5)
@@ -153,6 +174,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
 //                    .build();
 
             vec.fit();
+
 //                    WordVectorSerializer.writeWord2VecModel(vec, Environment.getExternalStorageDirectory().getAbsoluteFile()+"/"+"pathToSaveModel.txt");
             File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
             if (f != null) {
@@ -160,7 +182,9 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                     f.delete();
                 }
             }
+
             WordVectorSerializer.writeFullModel(vec, Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
+//            WordVectorSerializer.writeWord2VecModel(vec,f);
         }catch (IllegalStateException e){
             Toast.makeText(this,"학습오류 해당파일을 확인해주세요",Toast.LENGTH_LONG).show();
         }
@@ -220,10 +244,12 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                 try {
                     if (f != null && f.exists()) {
                         vec = WordVectorSerializer.loadFullModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
-                    }
-                } catch (FileNotFoundException e) {
 
-                }
+
+                    }
+                } catch (Exception e) {
+                    Log.e("로드실패",e.getMessage().toString());
+            }
             }
             return null;
         }
