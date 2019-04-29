@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +27,7 @@ import org.deeplearning4j.text.sentenceiterator.FileSentenceIterator;
 import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
+import org.deeplearning4j.text.tokenization.tokenizerfactory.NGramTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
@@ -48,6 +50,9 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
     int itter=1;
     int seed=0;
     int batchsize=1000;
+    int epoch=1;
+    int worker=1;
+    double learningrate=0.025;
     String filename="test";
     List<String>stopword;
         Collection<String> lst=null;
@@ -80,6 +85,9 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         seed=Integer.parseInt( sf.getString("seed", "0").trim());
         batchsize=Integer.parseInt( sf.getString("batchsize", "512").trim());
         filename=sf.getString("filename", "test").trim();
+        epoch=Integer.parseInt( sf.getString("epoch","1"));
+        worker=Integer.parseInt( sf.getString("worker","1"));
+        learningrate=Double.parseDouble(sf.getString("rate","0.025"));
         String path =Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/"; //폴더 경로
         File Folder = new File(path);
 
@@ -103,7 +111,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                     try {
 
                         lst = vec.wordsNearestSum(word, 10);
-                    Collection<String> ll = vec.wordsNearest(word,10);
+                        Collection<String> ll = vec.wordsNearest(word,10);
                         tv_result.setText("결과: " + lst.toString());
                         tv_result.append("\n결과2: "+ll.toString());
 //                        tv_result.setText("\n결과2: "+ll.toString());
@@ -134,6 +142,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         TokenizerFactory t = new DefaultTokenizerFactory();
 
         t.setTokenPreProcessor(new CommonPreprocessor());
+
 //        log.info("Building model....");
         stopword=new ArrayList<>();
         stopword.add(" ");
@@ -145,23 +154,25 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         stopword.add(">");
         stopword.add("<");
         stopword.add("\\");
+
         try {
             vec = new Word2Vec.Builder()
                     .minWordFrequency(minword) //등장 횟수가 minword 이하인 단어는 무시
-                    .iterations(1)   //학습반복횟수
+                    .iterations(itter)   //학습반복횟수
                     .layerSize(layersize) //output layer size
                     .windowSize(windowsize)
                     .iterate(iter)
 //                    .limitVocabularySize(1)  //사용하는 어휘수의 제한
-//                    .workers(4) //학습시 사용하는 쓰레드의 갯수
 //                    .useHierarchicSoftmax(true)
 //                    .useAdaGrad(true)
 //                    .seed(seed) //랜덤난수 적용
                     .tokenizerFactory(t)
-                    .epochs(5) //전체학습반복
+                    .epochs(epoch) //전체학습반복
                     .batchSize(batchsize)//사전 구축할때 한번에 읽을 단어 수
                     .stopWords(stopword) //학습할때 무시하는 단어의 리스트
-                   .build();
+                    .workers(worker)//학습시 사용하는 쓰레드의 갯수
+                    .learningRate(learningrate)
+                    .build();
 //            vec = new Word2Vec.Builder()
 //                    .minWordFrequency(5)
 //                    .iterations(1)
@@ -174,6 +185,13 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
 //                    .build();
 
             vec.fit();
+            final Collection<String>list=vec.getStopWords();
+            settexthandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    tv_result.append(list.toString());
+                }
+            });
 
 //                    WordVectorSerializer.writeWord2VecModel(vec, Environment.getExternalStorageDirectory().getAbsoluteFile()+"/"+"pathToSaveModel.txt");
             File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
@@ -278,6 +296,9 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         final EditText edt_iter =(EditText)view.findViewById(R.id.edt_iter);
         final EditText edt_seed =(EditText)view.findViewById(R.id.edt_seed);
         final EditText edt_batchsize =(EditText)view.findViewById(R.id.edt_batch);
+        final EditText edt_epoch =(EditText)view.findViewById(R.id.edt_epoch);
+        final EditText edt_worker =(EditText)view.findViewById(R.id.edt_worker);
+        final EditText edt_rate =(EditText)view.findViewById(R.id.edt_rate);
         Button btn_set=(Button)view.findViewById(R.id.btn_set);
         Button btn_cancel=(Button)view.findViewById(R.id.btn_cancle);
         edt_layersize.setText(String.valueOf(layersize));
@@ -286,6 +307,9 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         edt_iter.setText(String.valueOf(itter));
         edt_seed.setText(String.valueOf(seed));
         edt_batchsize.setText(String.valueOf(batchsize));
+        edt_epoch.setText(String.valueOf(epoch));
+        edt_worker.setText(String.valueOf(worker));
+        edt_rate.setText(String.valueOf(learningrate));
         btn_set.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -296,6 +320,9 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                 String siter=edt_iter.getText().toString().trim();
                 String sseed=edt_seed.getText().toString().trim();
                 String sbatch=edt_batchsize.getText().toString().trim();
+                String sepoch=edt_epoch.getText().toString().trim();
+                String sworker=edt_worker.getText().toString().trim();
+                String srate=edt_rate.getText().toString().trim();
                 if(!slayersize.equals("")) {
                     layersize = Integer.parseInt(slayersize);
                 }
@@ -314,7 +341,16 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                 if(!sbatch.equals("")) {
                    batchsize = Integer.parseInt(sbatch);
                 }
-                save_setting(slayersize,swindowsize,siter,sminword,sseed,sbatch);
+                if(!sepoch.equals("")) {
+                    epoch = Integer.parseInt(sepoch);
+                }
+                if(!sworker.equals("")) {
+                    worker = Integer.parseInt(sworker);
+                }
+                if(!srate.equals("")) {
+                    learningrate = Double.parseDouble(srate);
+                }
+                save_setting(slayersize,swindowsize,siter,sminword,sseed,sbatch,sepoch,sworker,srate);
                 alertDialog.cancel();
             }
         });
@@ -363,7 +399,10 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         });
         alertDialog.show();
     }
-    public void save_setting(String layersize, String windowsize,String iter,String minword,String seed,String batch) {
+    Handler settexthandler = new Handler();
+
+
+    public void save_setting(String layersize, String windowsize,String iter,String minword,String seed,String batch,String epoc,String worke,String rate) {
         SharedPreferences sharedPreferences = getSharedPreferences("setting_value", MODE_PRIVATE);
 
         //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
@@ -375,6 +414,9 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         editor.putString("minword",minword);
         editor.putString("seed",seed);
         editor.putString("batchsize",batch);
+        editor.putString("epoch",epoc);
+        editor.putString("worker",worke);
+        editor.putString("rate",rate);
         editor.commit();
     }
     public void save_setting2(String fname){

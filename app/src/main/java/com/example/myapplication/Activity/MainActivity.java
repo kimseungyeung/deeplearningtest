@@ -29,7 +29,11 @@ import com.example.myapplication.Data.MenuData;
 import com.example.myapplication.Data.NoPayData;
 import com.example.myapplication.R;
 
+import net.alhazmy13.wordcloud.WordCloud;
+import net.alhazmy13.wordcloud.WordCloudView;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -135,6 +139,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         }
+        List<WordCloud> dd=new ArrayList<WordCloud>();
+        WordCloud d = new WordCloud("안녕하세요",1);
+        WordCloud d2 = new WordCloud("어서오세요",1);
+        WordCloud d3 = new WordCloud("반갑습니다",1);
+        WordCloud d4 = new WordCloud("또오세요",1);
+        WordCloud d5 = new WordCloud("안녕히가세요",1);
+        WordCloud d6 = new WordCloud("즐거운시간되세요",1);
+        dd.add(d);
+        dd.add(d2);
+        dd.add(d3);
+        dd.add(d4);
+        dd.add(d5);
+        dd.add(d6);
+        WordCloudView wv = (WordCloudView)findViewById(R.id.testword);
+        wv.setDataSet(dd);
+//        wv.setsca
     }
 
     @Override
