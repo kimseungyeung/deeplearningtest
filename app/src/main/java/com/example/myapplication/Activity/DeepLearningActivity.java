@@ -172,6 +172,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                     .stopWords(stopword) //학습할때 무시하는 단어의 리스트
                     .workers(worker)//학습시 사용하는 쓰레드의 갯수
                     .learningRate(learningrate)
+                    .useAdaGrad(true)
                     .build();
 //            vec = new Word2Vec.Builder()
 //                    .minWordFrequency(5)
