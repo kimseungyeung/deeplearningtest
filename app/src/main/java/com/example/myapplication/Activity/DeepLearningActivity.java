@@ -1,13 +1,23 @@
 package com.example.myapplication.Activity;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,6 +43,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -102,7 +113,47 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_learning:
-                new LearningTask().execute();
+
+                if (Build.VERSION.SDK_INT >= 23) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                            || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
+                            ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED
+                    ) {
+
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                                && ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
+                                ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.INTERNET)) {
+                            //한번권한설정을 거절했을때 나오는부분
+                            new AlertDialog.Builder(this).setTitle("알림").setMessage("앱정보->권한\n권한들을 전부 허용해주셔야 앱을 이용할 수 있습니다.")
+                                    .setPositiveButton("종료", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                            finish();
+                                        }
+                                    }).setNegativeButton("권한 설정", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    Intent appDetail = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()));
+                                    appDetail.addCategory(Intent.CATEGORY_DEFAULT);
+                                    appDetail.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(appDetail);
+                                }
+                            }).setCancelable(false).show();
+
+
+                        } else {
+                            //맨처음 설치시 나오거나 다시보지않기선택시 나오는 부분
+                            ActivityCompat.requestPermissions(this,
+                                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET},
+                                    1);
+                        }
+                    }else{
+                        new LearningTask().execute();
+                    }
+                }
+               else{
+                    new LearningTask().execute();
+                }
                 break;
             case R.id.btn_text:
 
@@ -154,6 +205,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         stopword.add(">");
         stopword.add("<");
         stopword.add("\\");
+        stopword.add("%");
 
         try {
             vec = new Word2Vec.Builder()
@@ -172,7 +224,8 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                     .stopWords(stopword) //학습할때 무시하는 단어의 리스트
                     .workers(worker)//학습시 사용하는 쓰레드의 갯수
                     .learningRate(learningrate)
-                    .useAdaGrad(true)
+//                    .useAdaGrad(true)
+                    .useHierarchicSoftmax(true)
                     .build();
 //            vec = new Word2Vec.Builder()
 //                    .minWordFrequency(5)
@@ -428,5 +481,25 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
 
         editor.putString("filename",fname);
         editor.commit();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == 1) {
+            if (grantResults.length > 0) {
+                for (int i = 0; i < grantResults.length; ++i) {
+                    if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+
+                        Toast.makeText(this, "권한오류", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                }
+
+            }
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED
+            &&ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED) {
+                new LearningTask().execute();
+            }
+        }
     }
 }

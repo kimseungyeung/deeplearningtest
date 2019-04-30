@@ -29,8 +29,6 @@ import com.example.myapplication.Data.MenuData;
 import com.example.myapplication.Data.NoPayData;
 import com.example.myapplication.R;
 
-//import net.alhazmy13.wordcloud.WordCloud;
-//import net.alhazmy13.wordcloud.WordCloudView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        WordCloudView wv = (WordCloudView)findViewById(R.id.testword);
 //        wv.setDataSet(dd);
 //        wv.setsca
+
     }
 
     @Override
