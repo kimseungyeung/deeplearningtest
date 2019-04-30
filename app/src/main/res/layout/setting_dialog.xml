@@ -154,7 +154,6 @@
                 android:layout_width="100dip"
                 android:layout_height="wrap_content"
                 android:text="learningrate"/>
-            <!--<ㅅㄷ-->
             <EditText
                 android:id="@+id/edt_rate"
                 android:layout_width="match_parent"
