@@ -206,7 +206,10 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         stopword.add("<");
         stopword.add("\\");
         stopword.add("%");
-
+        stopword.add("＂");
+        stopword.add("”");
+        stopword.add("˝");
+        stopword.add("″");
         try {
             vec = new Word2Vec.Builder()
                     .minWordFrequency(minword) //등장 횟수가 minword 이하인 단어는 무시
