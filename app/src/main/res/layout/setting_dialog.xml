@@ -85,6 +85,23 @@
             <TextView
                 android:layout_width="100dip"
                 android:layout_height="wrap_content"
+                android:text="epoch"/>
+            <EditText
+                android:id="@+id/edt_epoch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:singleLine="true"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <TextView
+                android:layout_width="100dip"
+                android:layout_height="wrap_content"
                 android:text="seed"/>
             <EditText
                 android:id="@+id/edt_seed"
@@ -108,6 +125,40 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
+                android:singleLine="true"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <TextView
+                android:layout_width="100dip"
+                android:layout_height="wrap_content"
+                android:text="worker"/>
+            <EditText
+                android:id="@+id/edt_worker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:singleLine="true"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <TextView
+                android:layout_width="100dip"
+                android:layout_height="wrap_content"
+                android:text="learningrate"/>
+            <EditText
+                android:id="@+id/edt_rate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
                 android:singleLine="true"
                 />
         </LinearLayout>
