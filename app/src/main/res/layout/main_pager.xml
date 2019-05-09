@@ -90,6 +90,7 @@
             android:layout_height="0dip"
             android:background="@color/Orange"
             android:layout_weight="8"/>
+
 <!--<net.alhazmy13.wordcloud.WordCloudView-->
     <!--android:id="@+id/testword"-->
     <!--android:layout_width="match_parent"-->

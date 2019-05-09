@@ -20,6 +20,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,20 +31,39 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.myapplication.Adapter.FileListAdapter;
 import com.example.myapplication.R;
 
+import org.datavec.api.records.reader.RecordReader;
+import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
+import org.datavec.api.split.FileSplit;
+import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
+import org.deeplearning4j.models.embeddings.WeightLookupTable;
+import org.deeplearning4j.models.embeddings.inmemory.InMemoryLookupTable;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
+import org.deeplearning4j.models.sequencevectors.sequence.SequenceElement;
+import org.deeplearning4j.models.word2vec.VocabWord;
 import org.deeplearning4j.models.word2vec.Word2Vec;
+import org.deeplearning4j.models.word2vec.wordstore.VocabCache;
+import org.deeplearning4j.models.word2vec.wordstore.inmemory.AbstractCache;
+import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
 import org.deeplearning4j.text.sentenceiterator.FileSentenceIterator;
+import org.deeplearning4j.text.sentenceiterator.MutipleEpochsSentenceIterator;
 import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
+import org.deeplearning4j.text.sentenceiterator.SentencePreProcessor;
+import org.deeplearning4j.text.tokenization.tokenizer.Tokenizer;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.NGramTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.io.ClassPathResource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,6 +72,7 @@ import java.util.List;
 public class DeepLearningActivity extends AppCompatActivity implements View.OnClickListener {
     String filePath;
     SentenceIterator iter;
+    DataSetIterator iter2;
     Button btn_learning, btn_text,btn_settting,btn_settingfile;
     EditText edt_word;
     TextView tv_result;
@@ -62,11 +84,12 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
     int seed=0;
     int batchsize=1000;
     int epoch=1;
-    int worker=1;
+    int worker=3;
     double learningrate=0.025;
     String filename="test";
     List<String>stopword;
         Collection<String> lst=null;
+
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -96,14 +119,14 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         seed=Integer.parseInt( sf.getString("seed", "0").trim());
         batchsize=Integer.parseInt( sf.getString("batchsize", "512").trim());
         filename=sf.getString("filename", "test").trim();
-        epoch=Integer.parseInt( sf.getString("epoch","1"));
-        worker=Integer.parseInt( sf.getString("worker","1"));
-        learningrate=Double.parseDouble(sf.getString("rate","0.025"));
-        String path =Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/"; //폴더 경로
-        File Folder = new File(path);
+            epoch=Integer.parseInt( sf.getString("epoch","1"));
+            worker=Integer.parseInt( sf.getString("worker","1"));
+            learningrate=Double.parseDouble(sf.getString("rate","0.025"));
+            String path =Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/"; //폴더 경로
+            File Folder = new File(path);
 
-        // 해당 디렉토리가 없을경우 디렉토리를 생성합니다.
-        if (!Folder.exists()) {
+            // 해당 디렉토리가 없을경우 디렉토리를 생성합니다.
+            if (!Folder.exists()) {
             Folder.mkdir();
         }
         new LoadingTask().execute();
@@ -161,10 +184,20 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                     String word = edt_word.getText().toString();
                     try {
 
-                        lst = vec.wordsNearestSum(word, 10);
+
+
                         Collection<String> ll = vec.wordsNearest(word,10);
-                        tv_result.setText("결과: " + lst.toString());
+                       boolean hasword=vec.hasWord(word);
+                       String check="없음";
+                       if(hasword){
+                           check="있음";
+                       }
+                       INDArray dd =vec.getWordVectorMatrix(word);
+                        tv_result.setText("\n검색유무:"+ check);
+                        lst = vec.wordsNearestSum(word, 10);
+                        tv_result.append("결과: " + lst.toString());
                         tv_result.append("\n결과2: "+ll.toString());
+
 //                        tv_result.setText("\n결과2: "+ll.toString());
                     } catch (NullPointerException e) {
                         Toast.makeText(this, "결과값이 없습니다.", Toast.LENGTH_LONG).show();
@@ -188,12 +221,36 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         String path = "";
 //                File localFile = new File(Environment.getExternalStorageDirectory(), "raw_sentences.txt");
 
-        File localFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/", filename+".txt");
+        File localFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/", filename);
+        try {
+
+            RecordReader recordReader = new CSVRecordReader(0, ",");
+          recordReader.initialize(new FileSplit(localFile));
+            iter2 = new RecordReaderDataSetIterator(recordReader,150,6,0);
+
+        }catch (Exception eee){
+
+        }
         iter = new FileSentenceIterator(localFile);
+
+//        try {
+//
+//            iter = new BasicLineIterator(localFile.getAbsolutePath());
+//
+//        }catch (FileNotFoundException e){
+//            Log.e("이더실패",e.getMessage().toString());
+//        }
         TokenizerFactory t = new DefaultTokenizerFactory();
-
         t.setTokenPreProcessor(new CommonPreprocessor());
-
+       iter.setPreProcessor(new SentencePreProcessor() {
+           @Override
+           public String preProcess(String sentence) {
+               String s= sentence;
+               s=s.replace("“","");
+              s= s.replace("”","");
+               return s.toLowerCase();
+           }
+       });
 //        log.info("Building model....");
         stopword=new ArrayList<>();
         stopword.add(" ");
@@ -210,26 +267,38 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         stopword.add("”");
         stopword.add("˝");
         stopword.add("″");
+        stopword.add("”");
+        stopword.add("“");
+        stopword.add("”");
+//        VocabCache<VocabWord> cache = new AbstractCache<>();
+//        WeightLookupTable<VocabWord> table = new InMemoryLookupTable.Builder<VocabWord>()
+//                .vectorLength(100)
+//                .useAdaGrad(false)
+//                .cache(cache).build();
         try {
-            vec = new Word2Vec.Builder()
-                    .minWordFrequency(minword) //등장 횟수가 minword 이하인 단어는 무시
-                    .iterations(itter)   //학습반복횟수
-                    .layerSize(layersize) //output layer size
-                    .windowSize(windowsize)
-                    .iterate(iter)
+           try {
+               vec = new Word2Vec.Builder()
+                       .minWordFrequency(minword) //등장 횟수가 minword 이하인 단어는 무시
+                       .iterations(itter)   //문장반복횟수
+                       .layerSize(layersize) //output layer size
+                       .windowSize(windowsize)
+                       .iterate(iter)
 //                    .limitVocabularySize(1)  //사용하는 어휘수의 제한
 //                    .useHierarchicSoftmax(true)
 //                    .useAdaGrad(true)
 //                    .seed(seed) //랜덤난수 적용
-                    .tokenizerFactory(t)
-                    .epochs(epoch) //전체학습반복
-                    .batchSize(batchsize)//사전 구축할때 한번에 읽을 단어 수
-                    .stopWords(stopword) //학습할때 무시하는 단어의 리스트
-                    .workers(worker)//학습시 사용하는 쓰레드의 갯수
-                    .learningRate(learningrate)
+                       .tokenizerFactory(t)
+                       .epochs(epoch) //전체학습반복
+                       .batchSize(batchsize)//사전 구축할때 한번에 읽을 단어 수
+                       .stopWords(stopword) //학습할때 무시하는 단어의 리스트
+                       .workers(worker)//학습시 사용하는 쓰레드의 갯수
+                       .learningRate(learningrate) //학습설정시 1보다 무조건작게설정해야함
+
+
 //                    .useAdaGrad(true)
-                    .useHierarchicSoftmax(true)
-                    .build();
+//                       .useHierarchicSoftmax(true)
+
+                       .build();
 //            vec = new Word2Vec.Builder()
 //                    .minWordFrequency(5)
 //                    .iterations(1)
@@ -241,14 +310,12 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
 //                    .batchSize(1000) // 사전을 구축할때 한번에 읽을 단어 수
 //                    .build();
 
-            vec.fit();
+               vec.fit();
+           }catch (Exception e){
+            Log.e("에러",e.getMessage().toString());
+           }
             final Collection<String>list=vec.getStopWords();
-            settexthandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    tv_result.append(list.toString());
-                }
-            });
+
 
 //                    WordVectorSerializer.writeWord2VecModel(vec, Environment.getExternalStorageDirectory().getAbsoluteFile()+"/"+"pathToSaveModel.txt");
             File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
@@ -260,6 +327,12 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
 
             WordVectorSerializer.writeFullModel(vec, Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
 //            WordVectorSerializer.writeWord2VecModel(vec,f);
+            settexthandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    tv_result.setText(list.toString());
+                }
+            });
         }catch (IllegalStateException e){
             Toast.makeText(this,"학습오류 해당파일을 확인해주세요",Toast.LENGTH_LONG).show();
         }
@@ -273,11 +346,12 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
             super.onPreExecute();
 
             if (!isFinishing() && this != null) {
-                asyncDialog = new ProgressDialog(DeepLearningActivity.this);
-                asyncDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                asyncDialog.setMessage("학습 중 입니다...");
-                asyncDialog.setCancelable(false);
-                asyncDialog.show();
+//                asyncDialog = new ProgressDialog(DeepLearningActivity.this);
+//                asyncDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//                asyncDialog.setMessage("학습 중 입니다...");
+//                asyncDialog.setCancelable(false);
+//                asyncDialog.show();
+                asyncDialog = ProgressDialog.show(DeepLearningActivity.this, null, "학습 중 입니다...", false);
 
             }
         }
@@ -285,6 +359,8 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         @Override
         protected Boolean doInBackground(Integer... integers) {
             learning();
+
+
             return null;
         }
 
@@ -422,39 +498,60 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
     public void setfileDialog() {
         android.support.v7.app.AlertDialog.Builder dialogBuilder = new android.support.v7.app.AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
-        View view = inflater.inflate(R.layout.setting_file_dialog, null);
+        View view = inflater.inflate(R.layout.filelist_dialog, null);
         dialogBuilder.setView(view);
 
         final android.support.v7.app.AlertDialog alertDialog = dialogBuilder.create();
         alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         alertDialog.setCancelable(false);
         alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        final EditText edt_filename= (EditText)view.findViewById(R.id.edt_fielname);
-        Button btn_set=(Button)view.findViewById(R.id.btn_set);
-        Button btn_cancel=(Button)view.findViewById(R.id.btn_cancle);
-        edt_filename.setText(filename);
-
-        btn_set.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String sfilename=edt_filename.getText().toString().trim();
-
-                if(!sfilename.equals("")) {
-                    filename = sfilename;
+        final RecyclerView flist = (RecyclerView) view.findViewById(R.id.flist);
+        Button btn_set = (Button) view.findViewById(R.id.btn_set);
+        Button btn_cancel = (Button) view.findViewById(R.id.btn_cancel);
+//        edt_filename.setText(filename);
+        String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/";
+        File dirFile = new File(path);
+        File[] fileList = dirFile.listFiles();
+        ArrayList<File> filelist= new ArrayList<>();
+        int selectidx=-1;
+        for (File tempFile : fileList) {
+            if (tempFile.isFile()) {
+                filelist.add(tempFile);
+                if(filename.equals(tempFile.getName())){
+                    selectidx=filelist.size()-1;
                 }
+            }
+            final FileListAdapter flistadapter= new FileListAdapter(filelist,this);
+           flistadapter.setItemClick(new FileListAdapter.ItemClick() {
+               @Override
+               public void onClick(View view, int position, File fdata) {
+                    flistadapter.clickidx(position);
+               }
+           });
+            flist.setAdapter(flistadapter);
+            flistadapter.clickidx(selectidx);
+            flist.setLayoutManager(new LinearLayoutManager(this));
+            btn_set.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String sfilename=flistadapter.getfilename();
 
-              save_setting2(filename);
-                alertDialog.cancel();
-            }
-        });
-        btn_cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                alertDialog.cancel();
-            }
-        });
-        alertDialog.show();
+                    if (!sfilename.equals("")) {
+                        filename = sfilename;
+                    }
+
+                    save_setting2(filename);
+                    alertDialog.cancel();
+                }
+            });
+            btn_cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    alertDialog.cancel();
+                }
+            });
+            alertDialog.show();
+        }
     }
     Handler settexthandler = new Handler();
 
