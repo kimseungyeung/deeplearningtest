@@ -1,4 +1,4 @@
-package com.example.myapplication.Adapter;
+package com.running.myapplication.Adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -10,8 +10,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.myapplication.Data.MenuData;
-import com.example.myapplication.R;
+import com.running.myapplication.Data.MenuData;
+import com.running.myapplication.R;
 
 import java.util.ArrayList;
 

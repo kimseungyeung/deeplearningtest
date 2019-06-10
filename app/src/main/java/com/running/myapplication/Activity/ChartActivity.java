@@ -1,4 +1,4 @@
-package com.example.myapplication.Activity;
+package com.running.myapplication.Activity;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -7,7 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
-import com.example.myapplication.R;
+import com.running.myapplication.R;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;

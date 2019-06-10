@@ -1,4 +1,4 @@
-package com.example.myapplication.Data;
+package com.running.myapplication.Data;
 
 public class MenuData {
     private String menuname = "";//메뉴이름

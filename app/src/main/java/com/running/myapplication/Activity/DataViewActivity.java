@@ -1,4 +1,4 @@
-package com.example.myapplication.Activity;
+package com.running.myapplication.Activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,8 +9,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.example.myapplication.Data.NoPayData;
-import com.example.myapplication.R;
+import com.running.myapplication.Data.NoPayData;
+import com.running.myapplication.R;
 
 public class DataViewActivity extends AppCompatActivity implements View.OnClickListener {
     TextView tv_utext;

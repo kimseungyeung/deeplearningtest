@@ -1,4 +1,4 @@
-package com.example.myapplication.Activity;
+package com.running.myapplication.Activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -23,11 +23,11 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.myapplication.Adapter.MenuAdapter;
-import com.example.myapplication.Adapter.NopayAdapter;
-import com.example.myapplication.Data.MenuData;
-import com.example.myapplication.Data.NoPayData;
-import com.example.myapplication.R;
+import com.running.myapplication.Adapter.MenuAdapter;
+import com.running.myapplication.Adapter.NopayAdapter;
+import com.running.myapplication.Data.MenuData;
+import com.running.myapplication.Data.NoPayData;
+import com.running.myapplication.R;
 
 
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     Context context;
     DrawerLayout drawer;
-    Button btn_inmenu,btn_nopay,btn_pay,btn_closeing,btn_calendar;
+    Button btn_inmenu, btn_nopay, btn_pay, btn_closeing, btn_calendar;
     ImageButton imbtn_left_menu;
     RecyclerView leftmenu;
     ImageView iv_profile_picture;
@@ -45,17 +45,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String[] menulist = {"차트", "차트2", "deeplearning", "메뉴4", "메뉴5"};
     ArrayList<MenuData> md;
     ArrayList<NoPayData> nd;
-    int nopaycount=0;
+    int nopaycount = 0;
     PopupWindow pwindo;
-    int selectidx=0;
+    int selectidx = 0;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_pager);
         component();
     }
-    public void component(){
-        context=this;
+
+    public void component() {
+        context = this;
         imbtn_left_menu = (ImageButton) findViewById(R.id.imbtn_left_menu);
         imbtn_left_menu.setOnClickListener(this);
         drawer = (DrawerLayout) findViewById(R.id.drawer);
@@ -63,16 +65,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         iv_profile_picture = (ImageView) findViewById(R.id.iv_profile_picture);
         tv_nickname = (TextView) findViewById(R.id.tv_nickname_left);
         btn_inmenu = (Button) findViewById(R.id.btn_inmenu);
-        btn_pay=(Button)findViewById(R.id.btn_payment);
-        btn_nopay=(Button)findViewById(R.id.btn_nopayment);
-        btn_closeing=(Button)findViewById(R.id.btn_closeing);
-        btn_calendar=(Button)findViewById(R.id.btn_calendar);
+        btn_pay = (Button) findViewById(R.id.btn_payment);
+        btn_nopay = (Button) findViewById(R.id.btn_nopayment);
+        btn_closeing = (Button) findViewById(R.id.btn_closeing);
+        btn_calendar = (Button) findViewById(R.id.btn_calendar);
         btn_pay.setOnClickListener(this);
         btn_nopay.setOnClickListener(this);
         btn_closeing.setOnClickListener(this);
         btn_calendar.setOnClickListener(this);
         btn_inmenu.setOnClickListener(this);
-        if(md==null) {
+        if (md == null) {
             md = new ArrayList<>();
             boolean df = true;
             for (int i = 0; i < menulist.length; i++) {
@@ -85,21 +87,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 md.add(mm);
             }
         }
-        MenuAdapter mm = new MenuAdapter(md,R.layout.item_left_menu,R.layout.item_left_sub_menu,this);
+        MenuAdapter mm = new MenuAdapter(md, R.layout.item_left_menu, R.layout.item_left_sub_menu, this);
         mm.setItemClick(new MenuAdapter.ItemClick() {
             @Override
             public void onClick(View view, int position) {
-                switch (position){
+                switch (position) {
                     case 0:
-                        Intent i = new Intent(context,ChartActivity.class);
+                        Intent i = new Intent(context, ChartActivity.class);
                         startActivity(i);
                         break;
                     case 1:
-                        Intent i2 = new Intent(context,Chart2Activity.class);
+                        Intent i2 = new Intent(context, Chart2Activity.class);
                         startActivity(i2);
                         break;
                     case 2:
-                        Intent i3 = new Intent(context,DeepLearningActivity.class);
+                        Intent i3 = new Intent(context, DeepLearningActivity.class);
                         startActivity(i3);
                         break;
                     case 3:
@@ -114,14 +116,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         leftmenu.setAdapter(mm);
         leftmenu.setLayoutManager(new LinearLayoutManager(this));
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        nd= new ArrayList<>();
-        NoPayData ndd = new NoPayData(30,0,"보고서반송","13-10-7777 김승영","두개골절","김보현","김현수",true);
-        NoPayData nd2 = new NoPayData(16,1,"종결보고서 제출","13-10-574 박석원","요추.간판의","최수열","박창휘",false);
-        NoPayData nd3 = new NoPayData(59,3,"중간보고서 제출","13-11-2355 김규종","폐혈성 쇼크","김시현","김무열",false);
-        NoPayData nd4 = new NoPayData(41,1,"고객면담","13-16-3455 최현성","경추간판전위","김화연","김무안",false);
-        NoPayData nd5 = new NoPayData(24,2,"보고서반송","13-13-4355 이제성","간암","김철수","박영희",false);
-        NoPayData nd6 = new NoPayData(31,1,"종결보고서 제출","13-14-2355 이현우","폐암","김화연","최현희",false);
-        NoPayData nd7 = new NoPayData(13,3,"고객면담","13-13-4255 박현철","심근경색","김지연","박찬수",false);
+        nd = new ArrayList<>();
+        NoPayData ndd = new NoPayData(30, 0, "보고서반송", "13-10-7777 김승영", "두개골절", "김보현", "김현수", true);
+        NoPayData nd2 = new NoPayData(16, 1, "종결보고서 제출", "13-10-574 박석원", "요추.간판의", "최수열", "박창휘", false);
+        NoPayData nd3 = new NoPayData(59, 3, "중간보고서 제출", "13-11-2355 김규종", "폐혈성 쇼크", "김시현", "김무열", false);
+        NoPayData nd4 = new NoPayData(41, 1, "고객면담", "13-16-3455 최현성", "경추간판전위", "김화연", "김무안", false);
+        NoPayData nd5 = new NoPayData(24, 2, "보고서반송", "13-13-4355 이제성", "간암", "김철수", "박영희", false);
+        NoPayData nd6 = new NoPayData(31, 1, "종결보고서 제출", "13-14-2355 이현우", "폐암", "김화연", "최현희", false);
+        NoPayData nd7 = new NoPayData(13, 3, "고객면담", "13-13-4255 박현철", "심근경색", "김지연", "박찬수", false);
 
         nd.add(ndd);
         nd.add(nd2);
@@ -130,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         nd.add(nd5);
         nd.add(nd6);
         nd.add(nd7);
-        if(nopaycount==0) {
+        if (nopaycount == 0) {
             for (int i = 0; i < nd.size(); i++) {
                 if (nd.get(i).getCheckview() == false) {
                     nopaycount++;
@@ -168,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.btn_nopayment:
 
-                    popup1();
+                popup1();
 
                 break;
             case R.id.btn_payment:
@@ -196,11 +198,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-public void popup1(){
-    try {
-        WindowManager w = getWindowManager();
-        Display d = w.getDefaultDisplay();
 
+    public void popup1() {
+        try {
+            WindowManager w = getWindowManager();
+            Display d = w.getDefaultDisplay();
 
 
             Point realSize = new Point();
@@ -208,89 +210,85 @@ public void popup1(){
             int mWidthPixels = realSize.x;
             int mHeightPixels = realSize.y;
 
-        DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
+            DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
 
-        int width = dm.widthPixels;
+            int width = dm.widthPixels;
 
-        int height = dm.heightPixels;
+            int height = dm.heightPixels;
 
 
-        //  LayoutInflater 객체와 시킴
-        LayoutInflater inflater = (LayoutInflater) this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            //  LayoutInflater 객체와 시킴
+            LayoutInflater inflater = (LayoutInflater) this
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View layout = inflater.inflate(R.layout.nopayment_activity,
-                (ViewGroup) findViewById(R.id.ll_popup));
+            View layout = inflater.inflate(R.layout.nopayment_activity,
+                    (ViewGroup) findViewById(R.id.ll_popup));
 
-         pwindo = new PopupWindow(layout, mWidthPixels-100,
-                 mHeightPixels-550,false);
-        pwindo.setOutsideTouchable(true);
-        pwindo.setAnimationStyle(-1);
-        Button btn_view = (Button) layout.findViewById(R.id.btn_view);
-        Button btn_update =(Button)layout.findViewById(R.id.btn_update);
-        RecyclerView ll =(RecyclerView)layout.findViewById(R.id.recycle_list);
-        final NopayAdapter nadater =new NopayAdapter(nd,R.layout.item_popup1,this);
-        nadater.setItemClick(new NopayAdapter.ItemClick() {
-                                 @Override
-                                 public void onClick(View view, int position, NoPayData np) {
-                                     switch (view.getId()){
-                                         case R.id.ll_text:
-                                             Toast.makeText(getApplicationContext(),np.getStatetext(),Toast.LENGTH_LONG).show();
-                                             Intent i = new Intent(context,DataViewActivity.class);
-                                             i.putExtra("nopay",np);
-                                             startActivity(i);
-                                             break;
-                                         case R.id.iv_stype:
-                                             Toast.makeText(getApplicationContext(),String.valueOf(position),Toast.LENGTH_LONG).show();
+            pwindo = new PopupWindow(layout, mWidthPixels - 100,
+                    mHeightPixels - 600, false);
+            pwindo.setOutsideTouchable(true);
+            pwindo.setAnimationStyle(-1);
+            Button btn_view = (Button) layout.findViewById(R.id.btn_view);
+            Button btn_update = (Button) layout.findViewById(R.id.btn_update);
+            RecyclerView ll = (RecyclerView) layout.findViewById(R.id.recycle_list);
+            final NopayAdapter nadater = new NopayAdapter(nd, R.layout.item_popup1, this);
+            nadater.setItemClick(new NopayAdapter.ItemClick() {
+                @Override
+                public void onClick(View view, int position, NoPayData np) {
+                    switch (view.getId()) {
+                        case R.id.ll_text:
+                            Toast.makeText(getApplicationContext(), np.getStatetext(), Toast.LENGTH_LONG).show();
+                            Intent i = new Intent(context, DataViewActivity.class);
+                            i.putExtra("nopay", np);
+                            startActivity(i);
+                            break;
+                        case R.id.iv_stype:
+                            Toast.makeText(getApplicationContext(), String.valueOf(position), Toast.LENGTH_LONG).show();
 //                                             selectidx=position;
-                                             nadater.clickicon(position);
-                                             break;
-                                     }
+                            nadater.clickicon(position);
+                            break;
+                    }
 
 
-                                 }
-                             });
-                ll.setAdapter(nadater);
-        ll.setLayoutManager(new LinearLayoutManager(this));
+                }
+            });
+            ll.setAdapter(nadater);
+            ll.setLayoutManager(new LinearLayoutManager(this));
 
-        btn_view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),"확대",Toast.LENGTH_LONG).show();
-                pwindo.dismiss();
-            }
-        });
-        btn_update.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),"update",Toast.LENGTH_LONG).show();
-                pwindo.dismiss();
-            }
-        });
+            btn_view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getApplicationContext(), "확대", Toast.LENGTH_LONG).show();
+                    pwindo.dismiss();
+                }
+            });
+            btn_update.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getApplicationContext(), "update", Toast.LENGTH_LONG).show();
+                    pwindo.dismiss();
+                }
+            });
 
-        //View view = getWindow().getDecorView() ;
-        pwindo.showAtLocation(layout,Gravity.CENTER,0,200);
-        pwindo.showAsDropDown(layout);
-
-
+            //View view = getWindow().getDecorView() ;
+            pwindo.showAtLocation(layout, Gravity.CENTER, 0, 260);
+            pwindo.showAsDropDown(layout);
 
 
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
 
 
-    } catch (Exception e) {
-        Toast.makeText(getApplicationContext(),e.getMessage().toString(),Toast.LENGTH_LONG).show();
-        e.printStackTrace();
     }
-
-
-}
 
     @Override
     public void onBackPressed() {
 
-        if(drawer.isDrawerOpen(GravityCompat.END)){
+        if (drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawer(Gravity.RIGHT);
-        }else{
+        } else {
             super.onBackPressed();
         }
     }
