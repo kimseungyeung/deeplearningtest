@@ -52,6 +52,7 @@ import org.deeplearning4j.models.word2vec.wordstore.inmemory.AbstractCache;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
 import org.deeplearning4j.text.sentenceiterator.FileSentenceIterator;
+import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator;
 import org.deeplearning4j.text.sentenceiterator.MutipleEpochsSentenceIterator;
 import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.sentenceiterator.SentencePreProcessor;
@@ -265,7 +266,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
 
         File localFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/", filename);
 
-        iter = new FileSentenceIterator(localFile);
+       // iter = new FileSentenceIterator(localFile);
         try {
 //            RecordReader recordReader = new CSVRecordReader(0,",");
 //
@@ -277,13 +278,13 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         }catch (Exception e){
 
         }
-        try {
+      /*  try {*/
 
-            iter = new BasicLineIterator(localFile.getAbsolutePath());
-
-        }catch (FileNotFoundException e){
+          //  iter = new BasicLineIterator(localFile.getAbsolutePath());
+            iter = new LineSentenceIterator(localFile);
+      /*  }catch (FileNotFoundException e){
             Log.e("이더실패",e.getMessage().toString());
-        }
+        }*/
        // TokenizerFactory t = new DefaultTokenizerFactory();
 //        TokenizerFactory  t= new KoreanTokenizerFactory();
         TokenizerFactory t = new ExcelTokenizerFactory(0);
@@ -557,6 +558,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                     selectidx=filelist.size()-1;
                 }
             }
+        }
             final FileListAdapter flistadapter= new FileListAdapter(filelist,this);
            flistadapter.setItemClick(new FileListAdapter.ItemClick() {
                @Override
@@ -587,7 +589,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                 }
             });
             alertDialog.show();
-        }
+
     }
     Handler settexthandler = new Handler();
 
