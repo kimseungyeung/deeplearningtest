@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.twitter.penguin.korean.KoreanTokenJava;
 import com.twitter.penguin.korean.TwitterKoreanProcessorJava;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.deeplearning4j.text.tokenization.tokenizer.TokenPreProcess;
 import org.deeplearning4j.text.tokenization.tokenizer.Tokenizer;
@@ -17,7 +16,7 @@ import java.util.*;
  * (<a href=
  * "https://github.com/twitter/twitter-korean-text">https://github.com/twitter/twitter-korean-text</a>)
  */
-@Slf4j
+
 public class ExcelTokenizer implements Tokenizer {
     private Iterator<String> tokenIter;
     private List<String> tokenList;
