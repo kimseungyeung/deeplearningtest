@@ -101,13 +101,12 @@ dependencies {
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'com.github.AnyChart:AnyChart-Android:1.1.2'
     implementation 'org.deeplearning4j:deeplearning4j-nlp-korean_2.11:1.0.0-beta4'
+    implementation 'com.twitter.penguin:korean-text:4.4.4'
 //    implementation 'net.alhazmy13.wordcloud:library:0.2.0-beta'
 //    implementation 'com.kennycason:kumo-tokenizers:1.11'
 //    implementation 'com.kennycason:kumo-core:1.11'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    compileOnly "org.projectlombok:lombok:1.16.18"
 
-    annotationProcessor "org.projectlombok:lombok:1.16.18"
     testImplementation 'junit:junit:4.12'
 }
