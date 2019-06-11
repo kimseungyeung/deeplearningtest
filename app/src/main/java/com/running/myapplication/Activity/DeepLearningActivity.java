@@ -72,10 +72,13 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.security.Permission;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 public class DeepLearningActivity extends AppCompatActivity implements View.OnClickListener {
+    String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/";
     String filePath;
     SentenceIterator iter;
     DataSetIterator iter2;
@@ -164,14 +167,16 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
             epoch=Integer.parseInt( sf.getString("epoch","1"));
             worker=Integer.parseInt( sf.getString("worker","1"));
             learningrate=Double.parseDouble(sf.getString("rate","0.025"));
-            String path =Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/"; //폴더 경로
-            File Folder = new File(path);
+            String dl4jpath =Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/"; //폴더 경로
+            path = sf.getString("path",dl4jpath);
+            File Folder = new File(dl4jpath);
 
             // 해당 디렉토리가 없을경우 디렉토리를 생성합니다.
             if (!Folder.exists()) {
             Folder.mkdir();
+        }if(vec==null) {
+            new LoadingTask().execute();
         }
-        new LoadingTask().execute();
     }
 
     @Override
@@ -261,10 +266,10 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
     public void learning() {
        lst = null;
         Uri url = Uri.parse("android.resource://" + getPackageName() + "/" + "raw/" + "resulttext");
-        String path = "";
+       // String path = "";
 //                File localFile = new File(Environment.getExternalStorageDirectory(), "raw_sentences.txt");
 
-        File localFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/deeplearning/", filename);
+        File localFile = new File(path, filename);
 
        // iter = new FileSentenceIterator(localFile);
         try {
@@ -294,7 +299,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
            public String preProcess(String sentence) {
                String s= sentence;
                s=s.replace("“","");
-              s= s.replace("”","");
+               s=s.replace("”","");
                return s;
            }
        });
@@ -320,7 +325,6 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
 
         try {
            try {
-
                vec = new Word2Vec.Builder()
                        .minWordFrequency(minword) //등장 횟수가 minword 이하인 단어는 무시
                        .iterations(itter)   //문장반복횟수
@@ -352,7 +356,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
 
 
 //                    WordVectorSerializer.writeWord2VecModel(vec, Environment.getExternalStorageDirectory().getAbsoluteFile()+"/"+"pathToSaveModel.txt");
-            File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
+            File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "model.data");
             if (f != null) {
                 if (f.exists()) {
                     f.delete();
@@ -360,7 +364,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
             }
 
 //            WordVectorSerializer.writeFullModel(vec, Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
-            WordVectorSerializer.writeWord2VecModel(vec,Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
+            WordVectorSerializer.writeWord2VecModel(vec,Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "model.data");
             //            WordVectorSerializer.writeWord2VecModel(vec,f);
             settexthandler.post(new Runnable() {
                 @Override
@@ -426,11 +430,11 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         @Override
         protected Boolean doInBackground(Integer... integers) {
             if (vec == null) {
-                File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
+                File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "model.data");
                 try {
                     if (f != null && f.exists()) {
 //                        vec = WordVectorSerializer.loadFullModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
-                        vec=WordVectorSerializer.readWord2VecModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
+                        vec=WordVectorSerializer.readWord2VecModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "model.data");
 
                     }
                 } catch (Exception e) {
@@ -544,7 +548,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         Button btn_set = (Button) view.findViewById(R.id.btn_set);
         Button btn_cancel = (Button) view.findViewById(R.id.btn_cancel);
 //        edt_filename.setText(filename);
-        String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/";
+
         File dirFile = new File(path);
         File[] fileList = dirFile.listFiles();
         ArrayList<File> filelist= new ArrayList<>();
@@ -552,18 +556,56 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         filelist.add(f);
         int selectidx=-1;
         for (File tempFile : fileList) {
-            if (tempFile.isFile()) {
+
                 filelist.add(tempFile);
                 if(filename.equals(tempFile.getName())){
                     selectidx=filelist.size()-1;
                 }
-            }
+
         }
             final FileListAdapter flistadapter= new FileListAdapter(filelist,this);
            flistadapter.setItemClick(new FileListAdapter.ItemClick() {
                @Override
                public void onClick(View view, int position, File fdata) {
-                    flistadapter.clickidx(position);
+                   if(!fdata.getName().equals("...")&&fdata.isFile()) {
+                       path =fdata.getParentFile().getAbsolutePath();
+                       flistadapter.clickidx(position);
+                   }else{
+                       flistadapter.clickidx(position);
+                       File dirFile = new File(path);
+                       if(fdata.getName().equals("...")) {
+                           path = dirFile.getParentFile().getAbsolutePath();
+                       }else{
+                           path = fdata.getAbsolutePath();
+                       }
+                       dirFile = new File(path);
+                       File[] fileList = dirFile.listFiles();
+                       fileList = sortFileList(fileList,0);
+                       ArrayList<File> filelist= new ArrayList<>();
+                       File dir = new File(path);
+                       if(!dir.getPath().equals( Environment.getExternalStorageDirectory().getAbsolutePath())) {
+                           File f = new File("...");
+                           filelist.add(f);
+                       }
+                       int selectidx=-1;
+                       for (File tempFile : fileList) {
+                           if(tempFile.isDirectory()) {
+                               filelist.add(tempFile);
+                               if (filename.equals(tempFile.getName())) {
+                                   selectidx = filelist.size() - 1;
+                               }
+                           }
+                       }
+                       for (File tempFile : fileList) {
+                            if(tempFile.isFile()) {
+                                filelist.add(tempFile);
+                                if (filename.equals(tempFile.getName())) {
+                                    selectidx = filelist.size() - 1;
+                                }
+                            }
+                       }
+                       flistadapter.setFilelist(filelist);
+                   }
                }
            });
             flist.setAdapter(flistadapter);
@@ -578,7 +620,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                         filename = sfilename;
                     }
 
-                    save_setting2(filename);
+                    save_setting2(filename,path);
                     alertDialog.cancel();
                 }
             });
@@ -611,13 +653,14 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         editor.putString("rate",rate);
         editor.commit();
     }
-    public void save_setting2(String fname){
+    public void save_setting2(String fname,String fpath){
         SharedPreferences sharedPreferences = getSharedPreferences("setting_value", MODE_PRIVATE);
 
         //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         editor.putString("filename",fname);
+        editor.putString("path",fpath);
         editor.commit();
     }
 
@@ -640,4 +683,35 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
             }
         }
     }
+    public File[] sortFileList(File[] files, final int compareType)
+    {
+
+        Arrays.sort(files,
+                new Comparator<Object>()
+                {
+                    @Override
+                    public int compare(Object object1, Object object2) {
+
+                        String s1 = "";
+                        String s2 = "";
+
+                        if(compareType == 0){
+                            s1 = ((File)object1).getName();
+                            s2 = ((File)object2).getName();
+                        }
+                        else if(compareType == 1){
+                            s1 = ((File)object1).lastModified()+"";
+                            s2 = ((File)object2).lastModified()+"";
+                        }
+
+
+                        return s1.compareTo(s2);
+
+                    }
+                });
+
+        return files;
+    }
+
+
 }

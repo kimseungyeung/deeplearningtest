@@ -29,6 +29,10 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.Holder
         this.context =ctx;
 
     }
+    public void setFilelist(ArrayList<File>flist){
+        this.filelist=flist;
+        notifyDataSetChanged();
+    }
     public interface ItemClick {
         public void onClick(View view, int position, File fdata);
 
@@ -55,8 +59,15 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.Holder
         }
         final String fname= filelist.get(position).getName();
         final String fsize= Long.toString(filelist.get(position).length()/1024)+"kb";
-        holder.tv_fname.setText(fname);
+        if(filelist.get(position).isDirectory()){
+            holder.tv_fname.setText("(dir)"+fname);
+        }else {
+            holder.tv_fname.setText(fname);
+        }
         holder.tv_fsize.setText(fsize);
+        if(fname.equals("...")){
+            holder.tv_fsize.setText("");
+        }
         holder.ll_main.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
