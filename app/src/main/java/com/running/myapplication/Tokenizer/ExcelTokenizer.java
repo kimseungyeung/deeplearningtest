@@ -24,10 +24,13 @@ public class ExcelTokenizer implements Tokenizer {
     private TokenPreProcess preProcess;
     List<String> stopwords= new ArrayList<String>(Arrays.asList(" ", ".", ",", "?", "\"", "?", ">",
             "<", "\\", "%",
-            "\\/",":","^","(",")","-","[","]","/","\\","#","!"+"'","*","+","0","1","2","3","4","5","6","7","8","9","^","ㆍ"));
+            "이니","이다","으로","다고","에서","이며","니다","하다","가서","하고","하실","라며","하냐","나면","하기","지는","등등","◆","하겠","됨"
+            ,"서는","내려","하여","어져","~","하였","다했","지만","하면","로는","니까","입니","립니","하면","되냐","되는","°","는","를","해서"
+            ,"하시","하세","하셔","하신","이나","않냐","어졌","하며","었음","하셨","했","됩","었","하였","해야","▲","★","☆","※","ㄱ","ㄴ","ㄷ","ㅁ"
+            ,"\\/",":","^","(",")","-","[","]","/","\\","#","!"+"'","*","+","0","1","2","3","4","5","6","7","8","9","^","ㆍ"));
     boolean check=false;
     public ExcelTokenizer(String toTokenize, int type) {
-        Log.d("{}", toTokenize);
+        //    log.debug("{}", toTokenize);  토큰생성로그 텍스트가 많으면 로그가 뒤로 밀려서 진행상황 볼수가없음
         // need normalize?
 
         // Tokenize
@@ -44,7 +47,7 @@ public class ExcelTokenizer implements Tokenizer {
                 while (iter.hasNext()) {
                     String addd = iter.next().getText().trim();
                     if (!addd.equals(",") && !addd.equals("") && !addd.equals("\"") &&
-                            !addd.equals("[") && !addd.equals("]")
+                            !addd.equals("[") && !addd.equals("]")&&!addd.trim().equals("기지")
                     ) {
 
                         for(int i=0; i<stopwords.size(); i++){
