@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     RecyclerView leftmenu;
     ImageView iv_profile_picture;
     TextView tv_nickname;
-    String[] menulist = {"차트", "차트2", "deeplearning", "메뉴4", "메뉴5"};
+    String[] menulist = {"차트", "차트2", "deeplearning", "weblearning", "메뉴5"};
     ArrayList<MenuData> md;
     ArrayList<NoPayData> nd;
     int nopaycount = 0;
@@ -105,6 +105,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         startActivity(i3);
                         break;
                     case 3:
+                        Intent i4 = new Intent(context, WebLearningActivity.class);
+                        startActivity(i4);
                         break;
                     case 4:
                         break;
