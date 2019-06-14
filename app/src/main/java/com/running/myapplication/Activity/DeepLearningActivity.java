@@ -58,7 +58,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
     String filePath;
     SentenceIterator iter;
     DataSetIterator iter2;
-    Button btn_learning, btn_text,btn_settting,btn_settingfile;
+    Button btn_learning, btn_text,btn_settting,btn_settingfile,btn_web;
     EditText edt_word;
     TextView tv_result;
     Word2Vec vec = null;
@@ -129,6 +129,8 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
         btn_settingfile =(Button)findViewById(R.id.btn_setting_file);
         btn_settting.setOnClickListener(this);
         btn_settingfile.setOnClickListener(this);
+        btn_web =(Button)findViewById(R.id.web);
+        btn_web.setOnClickListener(this);
         btn_text.setOnClickListener(this);
         btn_learning.setOnClickListener(this);
         SharedPreferences sf = getSharedPreferences("setting_value", MODE_PRIVATE);
@@ -235,6 +237,10 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                 break;
             case R.id.btn_setting_file:
                 setfileDialog();
+                break;
+            case R.id.web:
+                Intent i4 = new Intent(getApplicationContext(), WebLearningActivity.class);
+                startActivity(i4);
                 break;
         }
     }
@@ -655,7 +661,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
             }
             if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED
             &&ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED) {
-                new LearningTask().execute();
+//                new LearningTask().execute();
             }
         }
     }
