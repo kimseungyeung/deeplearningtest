@@ -118,22 +118,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         leftmenu.setAdapter(mm);
         leftmenu.setLayoutManager(new LinearLayoutManager(this));
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        nd = new ArrayList<>();
-        NoPayData ndd = new NoPayData(30, 0, "보고서반송", "13-10-7777 김승영", "두개골절", "김보현", "김현수", true);
-        NoPayData nd2 = new NoPayData(16, 1, "종결보고서 제출", "13-10-574 박석원", "요추.간판의", "최수열", "박창휘", false);
-        NoPayData nd3 = new NoPayData(59, 3, "중간보고서 제출", "13-11-2355 김규종", "폐혈성 쇼크", "김시현", "김무열", false);
-        NoPayData nd4 = new NoPayData(41, 1, "고객면담", "13-16-3455 최현성", "경추간판전위", "김화연", "김무안", false);
-        NoPayData nd5 = new NoPayData(24, 2, "보고서반송", "13-13-4355 이제성", "간암", "김철수", "박영희", false);
-        NoPayData nd6 = new NoPayData(31, 1, "종결보고서 제출", "13-14-2355 이현우", "폐암", "김화연", "최현희", false);
-        NoPayData nd7 = new NoPayData(13, 3, "고객면담", "13-13-4255 박현철", "심근경색", "김지연", "박찬수", false);
+        if(nd==null) {
+            nd = new ArrayList<>();
+            NoPayData ndd = new NoPayData(30, 0, "보고서반송", "13-10-7777 김승영", "두개골절", "김보현", "김현수", true);
+            NoPayData nd2 = new NoPayData(16, 1, "종결보고서 제출", "13-10-574 박석원", "요추.간판의", "최수열", "박창휘", false);
+            NoPayData nd3 = new NoPayData(59, 3, "중간보고서 제출", "13-11-2355 김규종", "폐혈성 쇼크", "김시현", "김무열", false);
+            NoPayData nd4 = new NoPayData(41, 1, "고객면담", "13-16-3455 최현성", "경추간판전위", "김화연", "김무안", false);
+            NoPayData nd5 = new NoPayData(24, 2, "보고서반송", "13-13-4355 이제성", "간암", "김철수", "박영희", false);
+            NoPayData nd6 = new NoPayData(31, 1, "종결보고서 제출", "13-14-2355 이현우", "폐암", "김화연", "최현희", false);
+            NoPayData nd7 = new NoPayData(13, 3, "고객면담", "13-13-4255 박현철", "심근경색", "김지연", "박찬수", false);
 
-        nd.add(ndd);
-        nd.add(nd2);
-        nd.add(nd3);
-        nd.add(nd4);
-        nd.add(nd5);
-        nd.add(nd6);
-        nd.add(nd7);
+            nd.add(ndd);
+            nd.add(nd2);
+            nd.add(nd3);
+            nd.add(nd4);
+            nd.add(nd5);
+            nd.add(nd6);
+            nd.add(nd7);
+        }
         if (nopaycount == 0) {
             for (int i = 0; i < nd.size(); i++) {
                 if (nd.get(i).getCheckview() == false) {
