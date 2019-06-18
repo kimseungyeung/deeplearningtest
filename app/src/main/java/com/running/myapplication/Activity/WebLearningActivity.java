@@ -6,7 +6,10 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -20,7 +23,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -74,9 +79,6 @@ public class WebLearningActivity extends AppCompatActivity implements View.OnCli
     int epoch=1;
     int worker=1;
     double learningrate=0.025;
-    String filename="test";
-
-    Collection<String> lst=null;
     String value2=null;
 
         @Override
@@ -156,6 +158,7 @@ public class WebLearningActivity extends AppCompatActivity implements View.OnCli
                 wv_data.loadUrl("http:"+address);
                 break;
             case R.id.btn_setting:
+                setDialog();
                 break;
         }
     }
@@ -262,12 +265,119 @@ Handler h = new Handler();
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
+            tv_result.setText("");
+            try {
+                for (int i = 0; i < 10; i++) {
+                    String word = webvec.getVocab().elementAtIndex(i).getWord();
+                    tv_result.append(word + ",");
+                }
+            }catch (NullPointerException e){
+                tv_result.setText("단어없음");
+            }
             if (asyncDialog.isShowing()) {
                 asyncDialog.dismiss();
             }
         }
     }
+    public void setDialog() {
+        android.support.v7.app.AlertDialog.Builder dialogBuilder = new android.support.v7.app.AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.setting_dialog, null);
+        dialogBuilder.setView(view);
 
+        final android.support.v7.app.AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        alertDialog.setCancelable(false);
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        final EditText edt_layersize= (EditText)view.findViewById(R.id.edt_layersize);
+        final EditText edt_windowsize= (EditText)view.findViewById(R.id.edt_windowsize);
+        final EditText edt_minword= (EditText)view.findViewById(R.id.edt_minword);
+        final EditText edt_iter =(EditText)view.findViewById(R.id.edt_iter);
+        final EditText edt_seed =(EditText)view.findViewById(R.id.edt_seed);
+        final EditText edt_batchsize =(EditText)view.findViewById(R.id.edt_batch);
+        final EditText edt_epoch =(EditText)view.findViewById(R.id.edt_epoch);
+        final EditText edt_worker =(EditText)view.findViewById(R.id.edt_worker);
+        final EditText edt_rate =(EditText)view.findViewById(R.id.edt_rate);
+        Button btn_set=(Button)view.findViewById(R.id.btn_set);
+        Button btn_cancel=(Button)view.findViewById(R.id.btn_cancle);
+        edt_layersize.setText(String.valueOf(layersize));
+        edt_windowsize.setText(String.valueOf(windowsize));
+        edt_minword.setText(String.valueOf(minword));
+        edt_iter.setText(String.valueOf(itter));
+        edt_seed.setText(String.valueOf(seed));
+        edt_batchsize.setText(String.valueOf(batchsize));
+        edt_epoch.setText(String.valueOf(epoch));
+        edt_worker.setText(String.valueOf(worker));
+        edt_rate.setText(String.valueOf(learningrate));
+        btn_set.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String slayersize=edt_layersize.getText().toString().trim();
+                String swindowsize=edt_windowsize.getText().toString().trim();
+                String sminword=edt_minword.getText().toString().trim();
+                String siter=edt_iter.getText().toString().trim();
+                String sseed=edt_seed.getText().toString().trim();
+                String sbatch=edt_batchsize.getText().toString().trim();
+                String sepoch=edt_epoch.getText().toString().trim();
+                String sworker=edt_worker.getText().toString().trim();
+                String srate=edt_rate.getText().toString().trim();
+                if(!slayersize.equals("")) {
+                    layersize = Integer.parseInt(slayersize);
+                }
+                if(!swindowsize.equals("")) {
+                    windowsize = Integer.parseInt(swindowsize);
+                }
+                if(!sminword.equals("")) {
+                    minword = Integer.parseInt(sminword);
+                }
+                if(!siter.equals("")) {
+                    itter = Integer.parseInt(siter);
+                }
+                if(!sseed.equals("")) {
+                    seed = Integer.parseInt(sseed);
+                }
+                if(!sbatch.equals("")) {
+                    batchsize = Integer.parseInt(sbatch);
+                }
+                if(!sepoch.equals("")) {
+                    epoch = Integer.parseInt(sepoch);
+                }
+                if(!sworker.equals("")) {
+                    worker = Integer.parseInt(sworker);
+                }
+                if(!srate.equals("")) {
+                    learningrate = Double.parseDouble(srate);
+                }
+                save_setting(slayersize,swindowsize,siter,sminword,sseed,sbatch,sepoch,sworker,srate);
+                alertDialog.cancel();
+            }
+        });
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.cancel();
+            }
+        });
+        alertDialog.show();
+    }
+    public void save_setting(String layersize, String windowsize,String iter,String minword,String seed,String batch,String epoc,String worke,String rate) {
+        SharedPreferences sharedPreferences = getSharedPreferences("setting_value", MODE_PRIVATE);
+
+        //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+//        String text = edt_email.getText().toString(); // 사용자가 입력한 저장할 데이터
+        editor.putString("layersize", layersize); // key, value를 이용하여 저장하는 형태
+        editor.putString("windowsize", windowsize);
+        editor.putString("iter", iter);
+        editor.putString("minword",minword);
+        editor.putString("seed",seed);
+        editor.putString("batchsize",batch);
+        editor.putString("epoch",epoc);
+        editor.putString("worker",worke);
+        editor.putString("rate",rate);
+        editor.commit();
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
