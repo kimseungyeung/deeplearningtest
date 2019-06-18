@@ -34,7 +34,6 @@ import android.widget.Toast;
 import com.running.myapplication.Adapter.FileListAdapter;
 import com.running.myapplication.R;
 import com.running.myapplication.Tokenizer.ExcelTokenizerFactory;
-import com.running.myapplication.WordVectorCustom;
 
 
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
@@ -341,7 +340,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
             }
 
 //            WordVectorSerializer.writeFullModel(vec, Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
-            WordVectorCustom.writeWord2VecModel(vec,Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "model.data");
+            WordVectorSerializer.writeWord2VecModel(vec,Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "model.data");
             //            WordVectorSerializer.writeWord2VecModel(vec,f);
             settexthandler.post(new Runnable() {
                 @Override
@@ -411,7 +410,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                 try {
                     if (f != null && f.exists()) {
 //                        vec = WordVectorSerializer.loadFullModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "pathToSaveModel.txt");
-                        vec=WordVectorCustom.readWord2VecModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "model.data");
+                        vec=WordVectorSerializer.readWord2VecModel(Environment.getExternalStorageDirectory().getAbsolutePath() + "/deeplearning/" + "model.data");
 
                     }
                 } catch (Exception e) {
@@ -557,6 +556,7 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                        }
                        dirFile = new File(path);
                        File[] fileList = dirFile.listFiles();
+                       fileList = sortFileList(fileList,0);
                        ArrayList<File> filelist= new ArrayList<>();
                        File dir = new File(path);
                        if(!dir.getPath().equals( Environment.getExternalStorageDirectory().getAbsolutePath())) {
@@ -655,11 +655,39 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
             }
             if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED
             &&ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED) {
-               // new LearningTask().execute();
+                new LearningTask().execute();
             }
         }
     }
+    public File[] sortFileList(File[] files, final int compareType)
+    {
 
+        Arrays.sort(files,
+                new Comparator<Object>()
+                {
+                    @Override
+                    public int compare(Object object1, Object object2) {
+
+                        String s1 = "";
+                        String s2 = "";
+
+                        if(compareType == 0){
+                            s1 = ((File)object1).getName();
+                            s2 = ((File)object2).getName();
+                        }
+                        else if(compareType == 1){
+                            s1 = ((File)object1).lastModified()+"";
+                            s2 = ((File)object2).lastModified()+"";
+                        }
+
+
+                        return s1.compareTo(s2);
+
+                    }
+                });
+
+        return files;
+    }
 
 
 }
