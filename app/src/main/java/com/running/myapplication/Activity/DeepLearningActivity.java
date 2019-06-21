@@ -207,7 +207,8 @@ public class DeepLearningActivity extends AppCompatActivity implements View.OnCl
                     try {
 
 
-
+/*             String wordd= vec.getVocab().elementAtIndex(0).getWord();
+                       double freq= vec.getVocab().elementAtIndex(0).getElementFrequency(); elementatindex=빈도수 순서대로 값을가져올수있음 0번이 제일높음*/
                         Collection<String> ll = vec.wordsNearest(word,10);
                        boolean hasword=vec.hasWord(word);
                        String check="없음";
